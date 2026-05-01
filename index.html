@@ -10,109 +10,122 @@
         body { font-family: 'Figtree', sans-serif; background-color: #F4F7F9; }
         .column-width { min-width: 320px; width: 320px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .task-card:hover { border-color: #6366f1; transform: translateY(-2px); }
+        .task-card:hover { border-color: #6366f1; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
     <div id="taskModal" class="hidden fixed inset-0 bg-[#1A1D21]/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
-            <div class="px-6 py-4 border-b flex justify-between items-center bg-white">
+            <div class="px-6 py-4 border-b flex justify-between items-center bg-white shrink-0">
                 <div class="flex items-center gap-3">
-                    <button class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded font-bold text-sm hover:bg-indigo-50">✓ Complete</button>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-4">Task Details</span>
+                    <button class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded font-bold text-sm hover:bg-indigo-50 transition">✓ Complete Task</button>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] ml-4 border-l pl-4">Forge New Task</span>
                 </div>
-                <button onclick="closeModal()" class="text-2xl text-slate-400 hover:text-slate-600">&times;</button>
+                <button onclick="closeModal()" class="text-3xl text-slate-300 hover:text-slate-600 transition">&times;</button>
             </div>
+            
             <div class="flex flex-1 overflow-hidden">
                 <div class="flex-1 p-8 overflow-y-auto border-r border-slate-100 space-y-6">
-                    <input id="taskTitle" type="text" placeholder="Task Title" class="w-full text-3xl font-bold outline-none border-b-2 border-transparent focus:border-indigo-100">
-                    <textarea id="taskDesc" placeholder="Add a description..." class="w-full h-48 bg-transparent outline-none resize-none text-slate-600 text-lg"></textarea>
+                    <input id="taskTitle" type="text" placeholder="Task Title" class="w-full text-3xl font-bold outline-none border-b-2 border-transparent focus:border-indigo-100 placeholder:text-slate-200">
+                    <textarea id="taskDesc" placeholder="Click to add a description or instructions..." class="w-full h-64 bg-transparent outline-none resize-none text-slate-600 text-lg leading-relaxed"></textarea>
                 </div>
-                <div class="w-72 bg-slate-50/50 p-6 space-y-6">
+                <div class="w-80 bg-slate-50/50 p-6 space-y-8">
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Creator</label>
-                        <input id="taskCreator" type="text" placeholder="Name" class="w-full bg-transparent border-b border-slate-200 py-1 outline-none text-sm">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Architect (Creator)</label>
+                        <input id="taskCreator" type="text" placeholder="Your Name" class="w-full bg-transparent border-b border-slate-200 py-1.5 outline-none text-sm font-semibold text-slate-700 focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</label>
-                        <select id="taskStatus" class="w-full bg-transparent border-b border-slate-200 py-1 outline-none text-sm">
-                            <option value="initiation">Initiation</option>
-                            <option value="planning">Planning</option>
-                            <option value="resources">Resources</option>
-                            <option value="execution">Execution</option>
-                            <option value="monitoring">Monitoring</option>
-                            <option value="closing">Closing</option>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Phase (Status)</label>
+                        <select id="taskStatus" class="w-full bg-transparent border-b border-slate-200 py-1.5 outline-none text-sm font-semibold text-slate-700 cursor-pointer">
+                            <option value="initiation">💡 Initiation</option>
+                            <option value="planning">⚙️ Planning</option>
+                            <option value="resources">⏳ Resources</option>
+                            <option value="execution">🔄 Execution</option>
+                            <option value="monitoring">👓 Monitoring</option>
+                            <option value="closing">👍 Closing</option>
                         </select>
+                    </div>
+                    <div class="pt-10">
+                        <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                            <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-tighter italic">"Measure twice, cut once."</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t bg-slate-50 flex justify-end gap-3">
-                <button id="submitBtn" onclick="submitTask()" class="px-8 py-2 bg-indigo-600 text-white rounded-full font-bold shadow-lg hover:bg-indigo-700 transition">Forge Task</button>
+            
+            <div class="px-6 py-4 border-t bg-slate-50 flex justify-end gap-3 shrink-0">
+                <button onclick="closeModal()" class="px-6 py-2 font-bold text-slate-400 hover:text-slate-600">Cancel</button>
+                <button id="submitBtn" onclick="submitTask()" class="px-10 py-2.5 bg-indigo-600 text-white rounded-full font-bold shadow-lg hover:bg-indigo-700 transition transform active:scale-95">Forge Task</button>
             </div>
         </div>
     </div>
 
-    <header class="bg-white border-b px-8 py-4 flex justify-between items-center shrink-0">
+    <header class="bg-white border-b px-8 py-4 flex justify-between items-center shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-8">
             <div class="flex flex-col">
-                <span class="text-[10px] font-black tracking-[0.4em] text-indigo-600 uppercase">Tekton</span>
-                <h1 class="text-xl font-bold text-slate-800">Project Roadmap</h1>
+                <span class="text-[10px] font-black tracking-[0.5em] text-indigo-600 uppercase leading-none">Tektōn</span>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight">Project Roadmap</h1>
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <button onclick="fetchFromGoogle()" class="p-2 text-slate-400 hover:text-slate-600">🔄 Refresh</button>
-            <button onclick="openModal()" class="bg-indigo-600 text-white px-6 py-2 rounded-full font-bold shadow-md hover:bg-indigo-700 transition">+ Add Task</button>
+            <div id="syncStatus" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                <span id="dot" class="w-2 h-2 rounded-full bg-green-500"></span>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synced</span>
+            </div>
+            <button onclick="fetchFromGoogle()" class="p-2 text-slate-300 hover:text-indigo-600 transition">🔄</button>
+            <button onclick="openModal()" class="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-bold shadow-md hover:bg-indigo-700 transition transform active:scale-95">+ Add Task</button>
         </div>
     </header>
 
-    <main class="flex-1 overflow-x-auto flex p-8 gap-6 no-scrollbar">
+    <main class="flex-1 overflow-x-auto flex p-8 gap-8 no-scrollbar bg-[#F4F7F9]">
         <div class="column-width shrink-0">
-            <div class="flex items-center justify-between mb-4 border-b-2 border-[#17d1c1] pb-2 px-1">
-                <h2 class="font-bold text-slate-400 uppercase text-[11px] tracking-widest">💡 Initiation</h2>
-                <span id="initiation-count" class="text-[10px] font-bold text-slate-400">0</span>
+            <div class="flex items-center justify-between mb-6 border-b-4 border-[#17d1c1] pb-2 px-1">
+                <h2 class="font-black text-slate-400 uppercase text-[11px] tracking-[0.2em]">💡 Initiation</h2>
+                <span id="initiation-count" class="text-xs font-bold text-slate-300 bg-white px-2 py-0.5 rounded-full">0</span>
             </div>
             <div id="initiation" class="space-y-4"></div>
         </div>
         <div class="column-width shrink-0">
-            <div class="flex items-center justify-between mb-4 border-b-2 border-[#00a2ed] pb-2 px-1">
-                <h2 class="font-bold text-slate-400 uppercase text-[11px] tracking-widest">⚙️ Planning</h2>
-                <span id="planning-count" class="text-[10px] font-bold text-slate-400">0</span>
+            <div class="flex items-center justify-between mb-6 border-b-4 border-[#00a2ed] pb-2 px-1">
+                <h2 class="font-black text-slate-400 uppercase text-[11px] tracking-[0.2em]">⚙️ Planning</h2>
+                <span id="planning-count" class="text-xs font-bold text-slate-300 bg-white px-2 py-0.5 rounded-full">0</span>
             </div>
             <div id="planning" class="space-y-4"></div>
         </div>
         <div class="column-width shrink-0">
-            <div class="flex items-center justify-between mb-4 border-b-2 border-[#4a69ff] pb-2 px-1">
-                <h2 class="font-bold text-slate-400 uppercase text-[11px] tracking-widest">⏳ Resources</h2>
-                <span id="resources-count" class="text-[10px] font-bold text-slate-400">0</span>
+            <div class="flex items-center justify-between mb-6 border-b-4 border-[#4a69ff] pb-2 px-1">
+                <h2 class="font-black text-slate-400 uppercase text-[11px] tracking-[0.2em]">⏳ Resources</h2>
+                <span id="resources-count" class="text-xs font-bold text-slate-300 bg-white px-2 py-0.5 rounded-full">0</span>
             </div>
             <div id="resources" class="space-y-4"></div>
         </div>
         <div class="column-width shrink-0">
-            <div class="flex items-center justify-between mb-4 border-b-2 border-[#a882ff] pb-2 px-1">
-                <h2 class="font-bold text-slate-400 uppercase text-[11px] tracking-widest">🔄 Execution</h2>
-                <span id="execution-count" class="text-[10px] font-bold text-slate-400">0</span>
+            <div class="flex items-center justify-between mb-6 border-b-4 border-[#a882ff] pb-2 px-1">
+                <h2 class="font-black text-slate-400 uppercase text-[11px] tracking-[0.2em]">🔄 Execution</h2>
+                <span id="execution-count" class="text-xs font-bold text-slate-300 bg-white px-2 py-0.5 rounded-full">0</span>
             </div>
             <div id="execution" class="space-y-4"></div>
         </div>
         <div class="column-width shrink-0">
-            <div class="flex items-center justify-between mb-4 border-b-2 border-[#f0506e] pb-2 px-1">
-                <h2 class="font-bold text-slate-400 uppercase text-[11px] tracking-widest">👓 Monitoring</h2>
-                <span id="monitoring-count" class="text-[10px] font-bold text-slate-400">0</span>
+            <div class="flex items-center justify-between mb-6 border-b-4 border-[#f0506e] pb-2 px-1">
+                <h2 class="font-black text-slate-400 uppercase text-[11px] tracking-[0.2em]">👓 Monitoring</h2>
+                <span id="monitoring-count" class="text-xs font-bold text-slate-300 bg-white px-2 py-0.5 rounded-full">0</span>
             </div>
             <div id="monitoring" class="space-y-4"></div>
         </div>
         <div class="column-width shrink-0">
-            <div class="flex items-center justify-between mb-4 border-b-2 border-[#92d000] pb-2 px-1">
-                <h2 class="font-bold text-slate-400 uppercase text-[11px] tracking-widest">👍 Closing</h2>
-                <span id="closing-count" class="text-[10px] font-bold text-slate-400">0</span>
+            <div class="flex items-center justify-between mb-6 border-b-4 border-[#92d000] pb-2 px-1">
+                <h2 class="font-black text-slate-400 uppercase text-[11px] tracking-[0.2em]">👍 Closing</h2>
+                <span id="closing-count" class="text-xs font-bold text-slate-300 bg-white px-2 py-0.5 rounded-full">0</span>
             </div>
             <div id="closing" class="space-y-4"></div>
         </div>
     </main>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxNSzlj4F8IPzuYc17vT94Hj_8qkgDaimQXv4fPl2oeCXe2Q6XJg3G-zyODQz2C2Wjq6w/exec';
+        // YOUR UPDATED GOOGLE LINK
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwYSnr6ik4C5-hqSYcY_3lD2WW-_0yGeN0zfLWF8xsp4clGZTmig7dTqtxupHg_J4G0vg/exec';
 
         function openModal() { document.getElementById('taskModal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('taskModal').classList.add('hidden'); }
@@ -122,46 +135,81 @@
             const description = document.getElementById('taskDesc').value;
             const creator = document.getElementById('taskCreator').value;
             const status = document.getElementById('taskStatus').value;
+            const btn = document.getElementById('submitBtn');
 
-            if(!title) return alert("Task title required");
+            if(!title) return alert("Please provide a Task Title.");
+
+            btn.innerText = "Forging...";
+            btn.disabled = true;
 
             try {
                 await fetch(`${scriptURL}?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&creator=${encodeURIComponent(creator)}&status=${status}`, {
                     method: 'POST',
                     mode: 'no-cors'
                 });
+                
+                // Clear and Close
+                document.getElementById('taskTitle').value = '';
+                document.getElementById('taskDesc').value = '';
                 closeModal();
-                setTimeout(fetchFromGoogle, 1000);
-            } catch (e) { console.error(e); }
+                
+                // Refresh after delay
+                setTimeout(fetchFromGoogle, 1500);
+            } catch (e) {
+                console.error(e);
+                alert("The build failed. Check your script connection.");
+            } finally {
+                btn.innerText = "Forge Task";
+                btn.disabled = false;
+            }
         }
 
         async function fetchFromGoogle() {
+            const dot = document.getElementById('dot');
+            dot.style.backgroundColor = '#fbbf24'; // Yellow sync
+            
             try {
                 const response = await fetch(scriptURL);
                 const data = await response.json();
+                
                 const cols = ['initiation', 'planning', 'resources', 'execution', 'monitoring', 'closing'];
                 cols.forEach(id => document.getElementById(id).innerHTML = '');
 
                 data.forEach(task => {
                     const card = document.createElement('div');
-                    card.className = 'task-card bg-white p-5 rounded-xl shadow-sm border border-slate-200 transition-all cursor-pointer';
+                    card.className = 'task-card bg-white p-5 rounded-xl shadow-sm border border-slate-100 transition-all cursor-pointer';
                     card.innerHTML = `
-                        <h3 class="font-bold text-slate-800 leading-tight">${task.title}</h3>
-                        <p class="text-xs text-slate-400 mt-2 line-clamp-2">${task.description || ''}</p>
-                        <div class="flex justify-between items-center mt-4 pt-2 border-t border-slate-50">
-                            <span class="text-[9px] font-bold text-slate-300 uppercase">${task.creator || 'Tektōn'}</span>
-                            <span class="text-[9px] text-slate-300 italic">${task.date_created || ''}</span>
+                        <h3 class="font-bold text-slate-800 leading-snug mb-2">${task.title}</h3>
+                        <p class="text-xs text-slate-400 line-clamp-2 mb-4">${task.description || ''}</p>
+                        <div class="flex justify-between items-center pt-3 border-t border-slate-50">
+                            <div class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[8px] font-bold text-indigo-400">
+                                    ${(task.creator || 'A').charAt(0).toUpperCase()}
+                                </div>
+                                <span class="text-[9px] font-black text-slate-300 uppercase tracking-tighter">${task.creator || 'Tektōn'}</span>
+                            </div>
+                            <span class="text-[8px] text-slate-200 font-bold">${task.date_created ? task.date_created.split(' ')[0] : ''}</span>
                         </div>
                     `;
-                    const target = document.getElementById(task.status.toLowerCase().trim()) || document.getElementById('initiation');
+                    // Sanitize status for column matching
+                    const statusKey = (task.status || 'initiation').toLowerCase().trim();
+                    const target = document.getElementById(statusKey) || document.getElementById('initiation');
                     target.appendChild(card);
                 });
 
+                // Update Column Totals
                 cols.forEach(id => {
                     document.getElementById(id + '-count').innerText = document.getElementById(id).children.length;
                 });
-            } catch (e) { console.error(e); }
+                
+                dot.style.backgroundColor = '#22c55e'; // Green sync success
+            } catch (e) { 
+                console.error(e); 
+                dot.style.backgroundColor = '#ef4444'; // Red sync fail
+            }
         }
+
+        // Initial Load
         window.onload = fetchFromGoogle;
     </script>
 </body>
