@@ -9,6 +9,26 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans">
 
+    <div id="taskModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md mx-4">
+            <h2 class="text-xl font-bold mb-4 text-indigo-600">Hammer a New Task</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Title</label>
+                    <input id="taskTitle" type="text" placeholder="What needs building?" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Description</label>
+                    <textarea id="taskDesc" placeholder="Add details..." class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none h-32"></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button onclick="closeModal()" class="flex-1 py-3 bg-slate-100 rounded-xl font-medium hover:bg-slate-200 transition">Cancel</button>
+                    <button id="submitBtn" onclick="submitTask()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition">Add Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <header class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-4">
             <h1 class="text-xl font-bold text-indigo-600">ProjectBoard</h1>
@@ -40,39 +60,96 @@
     </main>
 
     <script>
-        // THE GOOGLE DRIVE LINK YOU PROVIDED
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxNSzlj4F8IPzuYc17vT94Hj_8qkgDaimQXv4fPl2oeCXe2Q6XJg3G-zyODQz2C2Wjq6w/exec';
 
+        // 1. MODAL LOGIC
+        function openModal() {
+            document.getElementById('taskModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+        }
+
+        // 2. SUBMIT DATA TO GOOGLE
+        async function submitTask() {
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDesc').value;
+            const btn = document.getElementById('submitBtn');
+
+            if (!title) return alert("Please provide a title.");
+
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            try {
+                // We use form data format which is easier for Google Apps Script to parse
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('description', description);
+                formData.append('status', 'todo');
+
+                await fetch(scriptURL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' // Allows the request to send even if Google doesn't send CORS headers back
+                });
+
+                // Reset and Close
+                document.getElementById('taskTitle').value = '';
+                document.getElementById('taskDesc').value = '';
+                closeModal();
+                
+                // Refresh board after a small delay to allow Google to process
+                setTimeout(fetchFromGoogle, 1500);
+
+            } catch (error) {
+                console.error('Error adding task:', error);
+                alert("Failed to add task. Check your Google Script permissions.");
+            } finally {
+                btn.innerText = "Add Task";
+                btn.disabled = false;
+            }
+        }
+
+        // 3. FETCH DATA FROM GOOGLE
         async function fetchFromGoogle() {
+            const dot = document.getElementById('dot');
+            dot.classList.add('animate-pulse');
+            dot.style.backgroundColor = '#fbbf24'; // Yellow
+
             try {
                 const response = await fetch(scriptURL);
                 const data = await response.json();
                 
-                // Clear the columns
+                // Clear columns
                 document.getElementById('todo').innerHTML = '';
                 document.getElementById('inprogress').innerHTML = '';
                 document.getElementById('done').innerHTML = '';
 
                 data.forEach(task => {
                     const card = document.createElement('div');
-                    card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200';
-                    card.innerHTML = `<h3 class="font-bold text-slate-800">${task.title}</h3><p class="text-sm text-slate-500">${task.description || ''}</p>`;
+                    card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition';
+                    card.innerHTML = `
+                        <h3 class="font-bold text-slate-800">${task.title}</h3>
+                        <p class="text-sm text-slate-500 mt-1">${task.description || ''}</p>
+                    `;
                     
-                    // Put task in the right column based on status
-                    const colId = (task.status || 'todo').toLowerCase().replace(/\s+/g, '');
-                    const target = document.getElementById(colId) || document.getElementById('todo');
+                    const statusKey = (task.status || 'todo').toLowerCase().replace(/\s+/g, '');
+                    const target = document.getElementById(statusKey) || document.getElementById('todo');
                     target.appendChild(card);
                 });
+
+                dot.style.backgroundColor = '#22c55e'; // Green
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error fetching data:', error);
+                dot.style.backgroundColor = '#ef4444'; // Red
+            } finally {
+                dot.classList.remove('animate-pulse');
             }
         }
 
-        function openModal() {
-            console.log("Add Task clicked");
-        }
-
-        // Run on load
+        // Load data when page opens
         window.onload = fetchFromGoogle;
     </script>
 </body>
