@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEKTON | Project Management</title>
+    <title>Interactive Project Board</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
@@ -11,105 +11,68 @@
 
     <header class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-indigo-600 tracking-tight">TEKTON</h1>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Built on the Rock</p>
-            </div>
-            <div id="syncStatus" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-4 border-l pl-4">
-                <span id="dot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Live Sync
+            <h1 class="text-xl font-bold text-indigo-600">ProjectBoard</h1>
+            <div id="syncStatus" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <span id="dot" class="w-2 h-2 rounded-full bg-green-500"></span> Synced
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="fetchFromGoogle()" class="px-4 py-2 text-sm bg-slate-100 rounded-lg hover:bg-slate-200 transition font-medium">🔄 Refresh Board</button>
-            <button onclick="openModal()" class="px-5 py-2 text-sm font-bold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md transition">🔨 Add Task</button>
+            <button onclick="fetchFromGoogle()" class="px-4 py-2 text-sm bg-slate-100 rounded-lg hover:bg-slate-200 transition">🔄 Refresh</button>
+            <button onclick="openModal()" class="px-5 py-2 text-sm font-bold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md transition">Add Task</button>
         </div>
     </header>
 
     <main class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1400px] mx-auto">
-        <section class="bg-slate-100/50 p-4 rounded-2xl border-2 border-dashed border-slate-200">
-            <h2 class="font-bold text-slate-500 mb-4 px-2 uppercase text-xs tracking-widest flex justify-between">
-                <span>The Blueprint (To Do)</span>
-                <span class="bg-slate-200 px-2 rounded-full">0</span>
-            </h2>
-            <div id="todo" class="min-h-[600px] space-y-3 p-2"></div>
+        <section>
+            <h2 class="font-bold text-slate-500 mb-4 px-2 uppercase text-xs tracking-widest">To Do</h2>
+            <div id="todo" class="min-h-[600px] p-2 bg-slate-200/50 rounded-2xl space-y-3"></div>
         </section>
 
-        <section class="bg-slate-100/50 p-4 rounded-2xl border-2 border-dashed border-slate-200">
-            <h2 class="font-bold text-slate-500 mb-4 px-2 uppercase text-xs tracking-widest flex justify-between">
-                <span>The Workbench (In Progress)</span>
-                <span class="bg-slate-200 px-2 rounded-full">0</span>
-            </h2>
-            <div id="inprogress" class="min-h-[600px] space-y-3 p-2"></div>
+        <section>
+            <h2 class="font-bold text-slate-500 mb-4 px-2 uppercase text-xs tracking-widest">In Progress</h2>
+            <div id="inprogress" class="min-h-[600px] p-2 bg-slate-200/50 rounded-2xl space-y-3"></div>
         </section>
 
-        <section class="bg-slate-100/50 p-4 rounded-2xl border-2 border-dashed border-slate-200">
-            <h2 class="font-bold text-slate-500 mb-4 px-2 uppercase text-xs tracking-widest flex justify-between">
-                <span>Finished Work (Done)</span>
-                <span class="bg-slate-200 px-2 rounded-full">0</span>
-            </h2>
-            <div id="done" class="min-h-[600px] space-y-3 p-2"></div>
+        <section>
+            <h2 class="font-bold text-slate-500 mb-4 px-2 uppercase text-xs tracking-widest">Done</h2>
+            <div id="done" class="min-h-[600px] p-2 bg-slate-200/50 rounded-2xl space-y-3"></div>
         </section>
     </main>
 
     <script>
-        // YOUR GOOGLE LINK
+        // THE GOOGLE DRIVE LINK YOU PROVIDED
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxNSzlj4F8IPzuYc17vT94Hj_8qkgDaimQXv4fPl2oeCXe2Q6XJg3G-zyODQz2C2Wjq6w/exec';
 
-        // Initialize Drag and Drop (SortableJS)
-        const columns = ['todo', 'inprogress', 'done'];
-        columns.forEach(id => {
-            new Sortable(document.getElementById(id), {
-                group: 'shared',
-                animation: 150,
-                ghostClass: 'bg-indigo-50',
-                onEnd: function (evt) {
-                    console.log('Task moved from ' + evt.from.id + ' to ' + evt.to.id);
-                    // Here you would add code to update Google Sheets if you want live movement
-                }
-            });
-        });
-
         async function fetchFromGoogle() {
-            const statusDot = document.getElementById('dot');
-            statusDot.classList.replace('bg-green-500', 'bg-yellow-500');
-            
             try {
                 const response = await fetch(scriptURL);
                 const data = await response.json();
-                renderTasks(data);
-                statusDot.classList.replace('bg-yellow-500', 'bg-green-500');
+                
+                // Clear the columns
+                document.getElementById('todo').innerHTML = '';
+                document.getElementById('inprogress').innerHTML = '';
+                document.getElementById('done').innerHTML = '';
+
+                data.forEach(task => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200';
+                    card.innerHTML = `<h3 class="font-bold text-slate-800">${task.title}</h3><p class="text-sm text-slate-500">${task.description || ''}</p>`;
+                    
+                    // Put task in the right column based on status
+                    const colId = (task.status || 'todo').toLowerCase().replace(/\s+/g, '');
+                    const target = document.getElementById(colId) || document.getElementById('todo');
+                    target.appendChild(card);
+                });
             } catch (error) {
-                console.error('Error fetching data:', error);
-                statusDot.classList.replace('bg-yellow-500', 'bg-red-500');
+                console.error('Error:', error);
             }
         }
 
-        function renderTasks(tasks) {
-            // Clear current boards
-            columns.forEach(id => document.getElementById(id).innerHTML = '');
-
-            tasks.forEach(task => {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-grab active:cursor-grabbing';
-                card.innerHTML = `
-                    <h3 class="font-bold text-slate-800">${task.title}</h3>
-                    <p class="text-sm text-slate-500 mt-1">${task.description || ''}</p>
-                    <div class="mt-3 flex items-center gap-2">
-                        <span class="text-[10px] bg-slate-100 px-2 py-1 rounded-md text-slate-400 font-bold uppercase tracking-tighter">#${task.id}</span>
-                    </div>
-                `;
-                
-                const colId = (task.status || 'todo').toLowerCase().replace(' ', '');
-                const targetCol = document.getElementById(colId) || document.getElementById('todo');
-                targetCol.appendChild(card);
-            });
-        }
-
         function openModal() {
-            alert("The Add Task feature is ready to be connected to your Google Sheet! For now, refresh to see live data.");
+            console.log("Add Task clicked");
         }
 
-        // Auto-load on start
+        // Run on load
         window.onload = fetchFromGoogle;
     </script>
 </body>
