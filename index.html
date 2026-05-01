@@ -13,7 +13,6 @@
       overflow: hidden;
       height: 100vh;
     }
-
     .board-wrapper {
       display: flex;
       height: calc(100vh - 85px);
@@ -22,7 +21,6 @@
       overflow-x: auto;
       align-items: flex-start;
     }
-
     .kanban-column {
       min-width: 320px;
       width: 320px;
@@ -32,7 +30,6 @@
       max-height: 100%;
       position: relative;
     }
-
     .col-header {
       font-size: 1.15rem;
       font-weight: 900;
@@ -45,7 +42,6 @@
       align-items: center;
       letter-spacing: -0.02em;
     }
-
     .task-column {
       flex: 1;
       overflow-y: auto;
@@ -53,11 +49,9 @@
       border-radius: 20px;
       transition: background 0.2s ease;
     }
-
     .task-column.drag-over {
       background: rgba(99, 102, 241, 0.06);
     }
-
     .task-card {
       background: white;
       border-radius: 16px;
@@ -68,18 +62,20 @@
       cursor: grab;
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
-
     .task-card:hover {
       border-color: #6366F1;
       transform: translateY(-3px);
       box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
     }
-
     .task-card.dragging {
       opacity: 0.45;
       transform: rotate(1deg);
     }
-
+    .task-card.completed-card h3,
+    .task-card.completed-card p {
+      text-decoration: line-through;
+      opacity: 0.8;
+    }
     .column-menu {
       position: absolute;
       right: 0;
@@ -93,7 +89,6 @@
       display: none;
       padding: 6px;
     }
-
     .column-menu button {
       width: 100%;
       text-align: left;
@@ -107,17 +102,14 @@
       border: 0;
       cursor: pointer;
     }
-
     .column-menu button:hover {
       background: #F1F5F9;
       color: #6366F1;
     }
-
     .overdue-card {
       background-color: #FFF5F5 !important;
       border: 2px solid #FEB2B2 !important;
     }
-
     .overdue-badge {
       background: #EF4444;
       color: white;
@@ -128,7 +120,6 @@
       margin-bottom: 8px;
       display: inline-block;
     }
-
     .meta-pill {
       display: inline-flex;
       align-items: center;
@@ -143,7 +134,6 @@
       border-radius: 999px;
       padding: 6px 9px;
     }
-
     .avatar {
       width: 24px;
       height: 24px;
@@ -157,7 +147,6 @@
       font-weight: 900;
       color: #6366F1;
     }
-
     .placeholder {
       border: 2px dashed #CBD5E1;
       border-radius: 22px;
@@ -170,9 +159,57 @@
       letter-spacing: 0.18em;
       background: rgba(255,255,255,0.45);
     }
-
+    .archived-launcher {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 70;
+    }
+    .archived-button {
+      background: #1E293B;
+      color: white;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+    }
+    .archived-panel {
+      position: fixed;
+      right: 20px;
+      bottom: 72px;
+      width: 360px;
+      max-height: 55vh;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+      padding: 16px;
+      z-index: 80;
+      display: none;
+    }
+    .archived-panel.open {
+      display: block;
+    }
+    .archived-item {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
+    }
+    .strike-title {
+      text-decoration: line-through;
+      opacity: 0.7;
     }
   </style>
 </head>
@@ -231,7 +268,7 @@
               <option value="resources">Resources</option>
               <option value="execution">Execution</option>
               <option value="monitoring">Monitoring</option>
-              <option value="closing">Closing</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
 
@@ -254,13 +291,29 @@
       </div>
 
       <div class="px-12 py-8 border-t bg-white flex justify-between items-center shrink-0">
-        <button id="deleteBtn" onclick="deleteTask()" class="hidden font-black text-red-500 text-xs uppercase tracking-widest hover:text-red-700 transition">Delete Task</button>
+        <div class="flex items-center gap-4">
+          <button id="completeBtn" onclick="toggleCompleted()" class="px-5 py-3 rounded-full bg-emerald-600 text-white font-black text-xs uppercase tracking-widest">Completed</button>
+          <span id="completedTitleLabel" class="text-sm font-black text-slate-500"></span>
+          <button id="archiveBtn" onclick="archiveTask()" class="px-5 py-3 rounded-full bg-slate-800 text-white font-black text-xs uppercase tracking-widest">Archive</button>
+        </div>
+
         <div class="flex gap-6 ml-auto">
           <button onclick="closeModal()" class="font-black text-slate-300 text-xs uppercase tracking-widest hover:text-slate-600 transition">Discard</button>
           <button id="submitBtn" onclick="saveTask()" class="bg-indigo-600 text-white px-16 py-5 rounded-full font-black uppercase tracking-widest shadow-2xl shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95">Save Task</button>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="archived-launcher">
+    <button id="archivedToggle" class="archived-button" onclick="toggleArchivedPanel(event)">Archived</button>
+  </div>
+
+  <div id="archivedPanel" class="archived-panel no-scrollbar">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-black text-slate-800 uppercase tracking-wider">Archived Projects</h3>
+    </div>
+    <div id="archivedList"></div>
   </div>
 
   <script>
@@ -272,11 +325,12 @@
       { id: "resources", name: "Resources", color: "#4a69ff" },
       { id: "execution", name: "Execution", color: "#a882ff" },
       { id: "monitoring", name: "Monitoring", color: "#f0506e" },
-      { id: "closing", name: "Closing", color: "#92d000" }
+      { id: "completed", name: "Completed", color: "#84cc16" }
     ];
 
     let currentTasks = [];
     let draggedTaskId = null;
+    let isMovingTask = false;
 
     function setSyncStatus(text, dotClass) {
       document.getElementById("syncText").innerText = text;
@@ -289,6 +343,10 @@
       return div.innerHTML;
     }
 
+    function isTruthy(value) {
+      return String(value).toLowerCase() === "true";
+    }
+
     function openCreateModal() {
       document.getElementById("modalModeLabel").innerText = "New Task";
       document.getElementById("taskId").value = "";
@@ -297,10 +355,9 @@
       document.getElementById("taskStatus").value = "initiation";
       document.getElementById("taskCreator").value = "";
       document.getElementById("taskDue").value = "";
-      document.getElementById("deleteBtn").classList.add("hidden");
       document.getElementById("timeTrack").innerText = "Active";
-      document.getElementById("trackerBox").classList.remove("bg-emerald-600");
-      document.getElementById("trackerBox").classList.add("bg-indigo-600");
+      document.getElementById("completedTitleLabel").innerText = "";
+      document.getElementById("completedTitleLabel").classList.remove("strike-title");
       document.getElementById("taskModal").classList.remove("hidden");
     }
 
@@ -315,17 +372,11 @@
       document.getElementById("taskStatus").value = (task.status || "initiation").toLowerCase().trim();
       document.getElementById("taskCreator").value = task.creator || "";
       document.getElementById("taskDue").value = task.due_date || "";
-      document.getElementById("deleteBtn").classList.remove("hidden");
 
-      if ((task.status || "").toLowerCase().trim() === "closing") {
-        document.getElementById("timeTrack").innerText = "Complete";
-        document.getElementById("trackerBox").classList.remove("bg-indigo-600");
-        document.getElementById("trackerBox").classList.add("bg-emerald-600");
-      } else {
-        document.getElementById("timeTrack").innerText = "Active";
-        document.getElementById("trackerBox").classList.remove("bg-emerald-600");
-        document.getElementById("trackerBox").classList.add("bg-indigo-600");
-      }
+      const completed = isTruthy(task.completed) || (task.status || "").toLowerCase().trim() === "completed";
+      document.getElementById("timeTrack").innerText = completed ? "Complete" : "Active";
+      document.getElementById("completedTitleLabel").innerText = task.title || "";
+      document.getElementById("completedTitleLabel").classList.toggle("strike-title", completed);
 
       document.getElementById("taskModal").classList.remove("hidden");
     }
@@ -367,55 +418,109 @@
       });
     }
 
+    function cleanupEmptyColumns() {
+      document.querySelectorAll(".task-column").forEach(column => {
+        const cards = column.querySelectorAll(".task-card");
+        const placeholder = column.querySelector(".placeholder");
+        if (cards.length === 0 && !placeholder) {
+          column.innerHTML = '<div class="placeholder">Phase Empty</div>';
+        }
+      });
+    }
+
     function renderTasks(tasks) {
       const now = new Date();
 
-      tasks.forEach(task => {
-        const status = (task.status || "initiation").toLowerCase().trim();
-        const column = document.getElementById(status);
-        if (!column) return;
+      document.querySelectorAll(".task-column").forEach(column => {
+        column.innerHTML = '<div class="placeholder">Phase Empty</div>';
+      });
 
-        const placeholder = column.querySelector(".placeholder");
-        if (placeholder) placeholder.remove();
+      const seen = new Set();
 
-        const dueDate = task.due_date ? new Date(task.due_date) : null;
-        const isOverdue = dueDate && !isNaN(dueDate.getTime()) && status !== "closing" && dueDate < now;
+      tasks
+        .filter(task => !isTruthy(task.archived))
+        .forEach(task => {
+          const taskId = String(task.task_id || "").trim();
+          if (!taskId || seen.has(taskId)) return;
+          seen.add(taskId);
 
-        const card = document.createElement("div");
-        card.className = "task-card" + (isOverdue ? " overdue-card" : "");
-        card.draggable = true;
-        card.dataset.taskId = task.task_id || "";
-        card.ondragstart = function(e) { dragTask(e, task.task_id); };
-        card.ondragend = function() { endDrag(); };
-        card.onclick = function(e) {
-          if (!e.target.closest(".card-handle")) {
-            openEditModal(task.task_id);
-          }
-        };
+          const status = (task.status || "initiation").toLowerCase().trim();
+          const column = document.getElementById(status);
+          if (!column) return;
 
-        const creator = task.creator || "";
-        const creatorInitial = creator ? creator.charAt(0).toUpperCase() : "?";
+          const placeholder = column.querySelector(".placeholder");
+          if (placeholder) placeholder.remove();
 
-        card.innerHTML = `
-          ${isOverdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
-          <div class="flex items-start justify-between gap-3">
-            <h3 class="font-black text-slate-800 uppercase tracking-tight leading-tight text-base">${escapeHtml(task.title || "")}</h3>
-            <span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>
-          </div>
-          <p class="text-sm text-slate-500 font-medium leading-relaxed mt-2 whitespace-pre-line">${escapeHtml(task.description || "")}</p>
-          <div class="flex flex-wrap gap-2 mt-4">
-            ${task.due_date ? `<span class="meta-pill">Due ${escapeHtml(task.due_date)}</span>` : ""}
-            <span class="meta-pill">${escapeHtml(status)}</span>
-          </div>
-          <div class="flex justify-between items-center mt-5 pt-4 border-t border-slate-100">
-            <div class="flex items-center gap-2">
-              <div class="avatar">${escapeHtml(creatorInitial)}</div>
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${escapeHtml(creator)}</span>
+          const dueDate = task.due_date ? new Date(task.due_date) : null;
+          const completed = isTruthy(task.completed) || status === "completed";
+          const isOverdue = dueDate && !isNaN(dueDate.getTime()) && !completed && dueDate < now;
+
+          const card = document.createElement("div");
+          card.className = "task-card" + (isOverdue ? " overdue-card" : "") + (completed ? " completed-card" : "");
+          card.draggable = true;
+          card.dataset.taskId = taskId;
+          card.ondragstart = function(e) { dragTask(e, taskId); };
+          card.ondragend = function() { endDrag(); };
+          card.onclick = function(e) {
+            if (!e.target.closest(".card-handle")) {
+              openEditModal(taskId);
+            }
+          };
+
+          const creator = task.creator || "";
+          const creatorInitial = creator ? creator.charAt(0).toUpperCase() : "?";
+
+          card.innerHTML = `
+            ${isOverdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="font-black text-slate-800 uppercase tracking-tight leading-tight text-base">${escapeHtml(task.title || "")}</h3>
+              <span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>
             </div>
+            <p class="text-sm text-slate-500 font-medium leading-relaxed mt-2 whitespace-pre-line">${escapeHtml(task.description || "")}</p>
+            <div class="flex flex-wrap gap-2 mt-4">
+              ${task.due_date ? `<span class="meta-pill">Due ${escapeHtml(task.due_date)}</span>` : ""}
+              <span class="meta-pill">${escapeHtml(status)}</span>
+            </div>
+            <div class="flex justify-between items-center mt-5 pt-4 border-t border-slate-100">
+              <div class="flex items-center gap-2">
+                <div class="avatar">${escapeHtml(creatorInitial)}</div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${escapeHtml(creator)}</span>
+              </div>
+            </div>
+          `;
+
+          column.appendChild(card);
+        });
+
+      renderArchivedTasks(tasks.filter(task => isTruthy(task.archived)));
+      cleanupEmptyColumns();
+    }
+
+    function renderArchivedTasks(tasks) {
+      const list = document.getElementById("archivedList");
+      list.innerHTML = "";
+
+      if (!tasks.length) {
+        list.innerHTML = '<div class="text-sm font-bold text-slate-400">No archived projects.</div>';
+        return;
+      }
+
+      tasks.forEach(task => {
+        const item = document.createElement("div");
+        item.className = "archived-item";
+        item.innerHTML = `
+          <div class="font-black text-slate-800 uppercase tracking-tight">${escapeHtml(task.title || "")}</div>
+          <div class="text-sm text-slate-500 mt-1">${escapeHtml(task.description || "")}</div>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="meta-pill">${escapeHtml(task.status || "")}</span>
+            ${task.archived_at ? `<span class="meta-pill">Archived ${escapeHtml(task.archived_at)}</span>` : ""}
           </div>
         `;
-
-        column.appendChild(card);
+        item.onclick = function() {
+          openEditModal(task.task_id);
+          closeArchivedPanel();
+        };
+        list.appendChild(item);
       });
     }
 
@@ -436,7 +541,7 @@
       } catch (error) {
         console.error("Load error:", error);
         setSyncStatus("Offline", "bg-red-500");
-        alert("Could not load tasks. Check the Apps Script deployment and your sheet headers.");
+        alert("Could not load tasks.");
       }
     }
 
@@ -453,7 +558,6 @@
         alert("Title required.");
         return;
       }
-
       if (!creator) {
         alert("Creator name required.");
         return;
@@ -499,19 +603,26 @@
       }
     }
 
-    async function deleteTask() {
+    async function toggleCompleted() {
       const taskId = document.getElementById("taskId").value.trim();
-      if (!taskId) return;
+      if (!taskId) {
+        document.getElementById("taskStatus").value = "completed";
+        document.getElementById("completedTitleLabel").innerText = document.getElementById("taskTitle").value.trim();
+        document.getElementById("completedTitleLabel").classList.add("strike-title");
+        return;
+      }
 
-      const confirmed = window.confirm("Delete this task?");
-      if (!confirmed) return;
+      const task = currentTasks.find(t => String(t.task_id) === String(taskId));
+      if (!task) return;
 
-      setSyncStatus("Deleting", "bg-yellow-500 animate-pulse");
+      const currentlyCompleted = isTruthy(task.completed) || (task.status || "").toLowerCase().trim() === "completed";
+      const nextCompleted = !currentlyCompleted;
 
       try {
         const formData = new URLSearchParams();
-        formData.append("action", "delete");
+        formData.append("action", "complete");
         formData.append("task_id", taskId);
+        formData.append("completed", String(nextCompleted));
 
         const response = await fetch(scriptURL, {
           method: "POST",
@@ -519,20 +630,54 @@
         });
 
         const result = await response.json();
-        if (!result.success) throw new Error(result.error || "Delete failed");
+        if (!result.success) throw new Error(result.error || "Complete failed");
+
+        document.getElementById("completedTitleLabel").innerText = document.getElementById("taskTitle").value.trim();
+        document.getElementById("completedTitleLabel").classList.toggle("strike-title", nextCompleted);
+        document.getElementById("taskStatus").value = nextCompleted ? "completed" : "monitoring";
+        document.getElementById("timeTrack").innerText = nextCompleted ? "Complete" : "Active";
+
+        await fetchFromGoogle();
+      } catch (error) {
+        console.error("Complete error:", error);
+        alert("Could not update completion.");
+      }
+    }
+
+    async function archiveTask() {
+      const taskId = document.getElementById("taskId").value.trim();
+      if (!taskId) {
+        alert("Save the task first, then archive it.");
+        return;
+      }
+
+      try {
+        const formData = new URLSearchParams();
+        formData.append("action", "archive");
+        formData.append("task_id", taskId);
+        formData.append("archived", "true");
+
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || "Archive failed");
 
         closeModal();
         await fetchFromGoogle();
+        openArchivedPanel();
       } catch (error) {
-        console.error("Delete error:", error);
-        setSyncStatus("Offline", "bg-red-500");
-        alert("Could not delete task.");
+        console.error("Archive error:", error);
+        alert("Could not archive task.");
       }
     }
 
     function dragTask(event, taskId) {
       draggedTaskId = taskId;
       event.dataTransfer.setData("text/plain", taskId);
+      event.dataTransfer.effectAllowed = "move";
       event.currentTarget.classList.add("dragging");
     }
 
@@ -553,20 +698,50 @@
 
     async function dropTask(event, newStatus) {
       event.preventDefault();
-      event.currentTarget.classList.remove("drag-over");
+      event.stopPropagation();
+
+      const column = event.currentTarget;
+      column.classList.remove("drag-over");
+
+      if (isMovingTask) return;
 
       const taskId = event.dataTransfer.getData("text/plain") || draggedTaskId;
       if (!taskId) return;
 
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
-      if (task && (task.status || "").toLowerCase().trim() === newStatus) {
+      if (!task) {
         endDrag();
         return;
       }
 
+      const oldStatus = (task.status || "").toLowerCase().trim();
+      if (oldStatus === newStatus) {
+        endDrag();
+        return;
+      }
+
+      const draggedCard = document.querySelector(`[data-task-id="${CSS.escape(taskId)}"]`);
+      if (!draggedCard) {
+        endDrag();
+        return;
+      }
+
+      isMovingTask = true;
       setSyncStatus("Moving", "bg-yellow-500 animate-pulse");
 
       try {
+        const placeholder = column.querySelector(".placeholder");
+        if (placeholder) placeholder.remove();
+
+        column.appendChild(draggedCard);
+        task.status = newStatus;
+        task.completed = newStatus === "completed";
+
+        const statusPill = draggedCard.querySelector(".meta-pill:last-child");
+        if (statusPill) statusPill.textContent = newStatus;
+
+        draggedCard.classList.toggle("completed-card", newStatus === "completed");
+
         const formData = new URLSearchParams();
         formData.append("action", "move");
         formData.append("task_id", taskId);
@@ -580,12 +755,17 @@
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Move failed");
 
-        await fetchFromGoogle();
+        setSyncStatus("Live Sync", "bg-green-500 animate-pulse");
+        cleanupEmptyColumns();
       } catch (error) {
         console.error("Move error:", error);
+        task.status = oldStatus;
+        await fetchFromGoogle();
         setSyncStatus("Offline", "bg-red-500");
         alert("Could not move task.");
       } finally {
+        isMovingTask = false;
+        draggedTaskId = null;
         endDrag();
       }
     }
@@ -611,6 +791,20 @@
       fetchFromGoogle();
     }
 
+    function toggleArchivedPanel(event) {
+      if (event) event.stopPropagation();
+      const panel = document.getElementById("archivedPanel");
+      panel.classList.toggle("open");
+    }
+
+    function openArchivedPanel() {
+      document.getElementById("archivedPanel").classList.add("open");
+    }
+
+    function closeArchivedPanel() {
+      document.getElementById("archivedPanel").classList.remove("open");
+    }
+
     window.onclick = function(event) {
       const modal = document.getElementById("taskModal");
       if (event.target === modal) closeModal();
@@ -619,6 +813,10 @@
         document.querySelectorAll(".column-menu").forEach(menu => {
           menu.style.display = "none";
         });
+      }
+
+      if (!event.target.closest("#archivedPanel") && !event.target.closest("#archivedToggle")) {
+        closeArchivedPanel();
       }
     };
 
