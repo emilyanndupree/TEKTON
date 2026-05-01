@@ -13,6 +13,7 @@
       overflow: hidden;
       height: 100vh;
     }
+
     .board-wrapper {
       display: flex;
       height: calc(100vh - 85px);
@@ -21,6 +22,7 @@
       overflow-x: auto;
       align-items: flex-start;
     }
+
     .kanban-column {
       min-width: 320px;
       width: 320px;
@@ -30,6 +32,7 @@
       max-height: 100%;
       position: relative;
     }
+
     .col-header {
       font-size: 1.15rem;
       font-weight: 900;
@@ -42,6 +45,7 @@
       align-items: center;
       letter-spacing: -0.02em;
     }
+
     .task-column {
       flex: 1;
       overflow-y: auto;
@@ -49,9 +53,11 @@
       border-radius: 20px;
       transition: background 0.2s ease;
     }
+
     .task-column.drag-over {
       background: rgba(99, 102, 241, 0.06);
     }
+
     .task-card {
       background: white;
       border-radius: 16px;
@@ -62,15 +68,18 @@
       cursor: grab;
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
+
     .task-card:hover {
       border-color: #6366F1;
       transform: translateY(-3px);
       box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
     }
+
     .task-card.dragging {
       opacity: 0.45;
       transform: rotate(1deg);
     }
+
     .column-menu {
       position: absolute;
       right: 0;
@@ -84,6 +93,7 @@
       display: none;
       padding: 6px;
     }
+
     .column-menu button {
       width: 100%;
       text-align: left;
@@ -93,15 +103,21 @@
       color: #475569;
       border-radius: 8px;
       transition: 0.2s;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
     }
+
     .column-menu button:hover {
       background: #F1F5F9;
       color: #6366F1;
     }
+
     .overdue-card {
       background-color: #FFF5F5 !important;
       border: 2px solid #FEB2B2 !important;
     }
+
     .overdue-badge {
       background: #EF4444;
       color: white;
@@ -112,6 +128,7 @@
       margin-bottom: 8px;
       display: inline-block;
     }
+
     .meta-pill {
       display: inline-flex;
       align-items: center;
@@ -126,6 +143,7 @@
       border-radius: 999px;
       padding: 6px 9px;
     }
+
     .avatar {
       width: 24px;
       height: 24px;
@@ -139,6 +157,7 @@
       font-weight: 900;
       color: #6366F1;
     }
+
     .placeholder {
       border: 2px dashed #CBD5E1;
       border-radius: 22px;
@@ -151,6 +170,7 @@
       letter-spacing: 0.18em;
       background: rgba(255,255,255,0.45);
     }
+
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -217,7 +237,7 @@
 
           <div>
             <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-4">Creator</label>
-            <input id="taskCreator" type="text" class="w-full p-5 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-700 outline-none shadow-sm focus:border-indigo-400 transition-all" value="Tekton">
+            <input id="taskCreator" type="text" placeholder="First Name Last Name" class="w-full p-5 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-700 outline-none shadow-sm focus:border-indigo-400 transition-all">
           </div>
 
           <div>
@@ -275,11 +295,11 @@
       document.getElementById("taskTitle").value = "";
       document.getElementById("taskDesc").value = "";
       document.getElementById("taskStatus").value = "initiation";
-      document.getElementById("taskCreator").value = "Tekton";
+      document.getElementById("taskCreator").value = "";
       document.getElementById("taskDue").value = "";
       document.getElementById("deleteBtn").classList.add("hidden");
       document.getElementById("timeTrack").innerText = "Active";
-      document.getElementById("trackerBox").classList.remove("bg-rose-600");
+      document.getElementById("trackerBox").classList.remove("bg-emerald-600");
       document.getElementById("trackerBox").classList.add("bg-indigo-600");
       document.getElementById("taskModal").classList.remove("hidden");
     }
@@ -293,7 +313,7 @@
       document.getElementById("taskTitle").value = task.title || "";
       document.getElementById("taskDesc").value = task.description || "";
       document.getElementById("taskStatus").value = (task.status || "initiation").toLowerCase().trim();
-      document.getElementById("taskCreator").value = task.creator || "Tekton";
+      document.getElementById("taskCreator").value = task.creator || "";
       document.getElementById("taskDue").value = task.due_date || "";
       document.getElementById("deleteBtn").classList.remove("hidden");
 
@@ -373,8 +393,8 @@
           }
         };
 
-        const creator = task.creator || "Tekton";
-        const creatorInitial = creator.charAt(0).toUpperCase();
+        const creator = task.creator || "";
+        const creatorInitial = creator ? creator.charAt(0).toUpperCase() : "?";
 
         card.innerHTML = `
           ${isOverdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
@@ -425,12 +445,17 @@
       const title = document.getElementById("taskTitle").value.trim();
       const description = document.getElementById("taskDesc").value.trim();
       const status = document.getElementById("taskStatus").value;
-      const creator = document.getElementById("taskCreator").value.trim() || "Tekton";
+      const creator = document.getElementById("taskCreator").value.trim();
       const dueDate = document.getElementById("taskDue").value;
       const btn = document.getElementById("submitBtn");
 
       if (!title) {
         alert("Title required.");
+        return;
+      }
+
+      if (!creator) {
+        alert("Creator name required.");
         return;
       }
 
@@ -518,8 +543,7 @@
 
     function allowDrop(event) {
       event.preventDefault();
-      const column = event.currentTarget;
-      column.classList.add("drag-over");
+      event.currentTarget.classList.add("drag-over");
     }
 
     function handleDragLeave(event) {
@@ -568,7 +592,12 @@
 
     function sortColumnByDueDate(columnId) {
       const sorted = [...currentTasks].sort((a, b) => {
-        if ((a.status || "").toLowerCase().trim() !== columnId && (b.status || "").toLowerCase().trim() !== columnId) return 0;
+        const aMatch = (a.status || "").toLowerCase().trim() === columnId;
+        const bMatch = (b.status || "").toLowerCase().trim() === columnId;
+        if (!aMatch && !bMatch) return 0;
+        if (aMatch && !bMatch) return -1;
+        if (!aMatch && bMatch) return 1;
+
         const aDate = a.due_date ? new Date(a.due_date).getTime() : Number.MAX_SAFE_INTEGER;
         const bDate = b.due_date ? new Date(b.due_date).getTime() : Number.MAX_SAFE_INTEGER;
         return aDate - bDate;
