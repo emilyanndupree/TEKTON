@@ -9,22 +9,14 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans">
 
-    <div id="taskModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center">
-        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md mx-4">
-            <h2 class="text-xl font-bold mb-4 text-indigo-600">Hammer a New Task</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Title</label>
-                    <input id="taskTitle" type="text" placeholder="What needs building?" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Description</label>
-                    <textarea id="taskDesc" placeholder="Add details..." class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none h-32"></textarea>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button onclick="closeModal()" class="flex-1 py-3 bg-slate-100 rounded-xl font-medium hover:bg-slate-200 transition">Cancel</button>
-                    <button id="submitBtn" onclick="submitTask()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition">Add Task</button>
-                </div>
+    <div id="taskModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-80">
+            <h2 class="font-bold mb-4">Add New Task</h2>
+            <input id="taskTitle" type="text" placeholder="Title" class="w-full mb-2 p-2 border rounded">
+            <textarea id="taskDesc" placeholder="Description" class="w-full mb-4 p-2 border rounded"></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal()" class="px-3 py-1 bg-slate-200 rounded">Cancel</button>
+                <button onclick="submitTask()" class="px-3 py-1 bg-indigo-600 text-white rounded">Save</button>
             </div>
         </div>
     </div>
@@ -38,7 +30,7 @@
         </div>
         <div class="flex gap-2">
             <button onclick="fetchFromGoogle()" class="px-4 py-2 text-sm bg-slate-100 rounded-lg hover:bg-slate-200 transition">🔄 Refresh</button>
-            <button onclick="openModal()" class="px-5 py-2 text-sm font-bold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md transition">Add Task</button>
+            <button onclick="openModal()" class="px-5 py-2 text-sm font-bold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md">Add Task</button>
         </div>
     </header>
 
@@ -62,94 +54,37 @@
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxNSzlj4F8IPzuYc17vT94Hj_8qkgDaimQXv4fPl2oeCXe2Q6XJg3G-zyODQz2C2Wjq6w/exec';
 
-        // 1. MODAL LOGIC
-        function openModal() {
-            document.getElementById('taskModal').classList.remove('hidden');
-        }
+        // Essential logic to make those original buttons work
+        function openModal() { document.getElementById('taskModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('taskModal').classList.add('hidden'); }
 
-        function closeModal() {
-            document.getElementById('taskModal').classList.add('hidden');
-        }
-
-        // 2. SUBMIT DATA TO GOOGLE
         async function submitTask() {
             const title = document.getElementById('taskTitle').value;
-            const description = document.getElementById('taskDesc').value;
-            const btn = document.getElementById('submitBtn');
-
-            if (!title) return alert("Please provide a title.");
-
-            btn.innerText = "Saving...";
-            btn.disabled = true;
-
-            try {
-                // We use form data format which is easier for Google Apps Script to parse
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('description', description);
-                formData.append('status', 'todo');
-
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    body: formData,
-                    mode: 'no-cors' // Allows the request to send even if Google doesn't send CORS headers back
-                });
-
-                // Reset and Close
-                document.getElementById('taskTitle').value = '';
-                document.getElementById('taskDesc').value = '';
-                closeModal();
-                
-                // Refresh board after a small delay to allow Google to process
-                setTimeout(fetchFromGoogle, 1500);
-
-            } catch (error) {
-                console.error('Error adding task:', error);
-                alert("Failed to add task. Check your Google Script permissions.");
-            } finally {
-                btn.innerText = "Add Task";
-                btn.disabled = false;
-            }
+            const desc = document.getElementById('taskDesc').value;
+            // This sends the data to your Google Drive
+            await fetch(`${scriptURL}?title=${encodeURIComponent(title)}&description=${encodeURIComponent(desc)}&status=todo`, {
+                method: 'POST',
+                mode: 'no-cors'
+            });
+            closeModal();
+            fetchFromGoogle();
         }
 
-        // 3. FETCH DATA FROM GOOGLE
         async function fetchFromGoogle() {
-            const dot = document.getElementById('dot');
-            dot.classList.add('animate-pulse');
-            dot.style.backgroundColor = '#fbbf24'; // Yellow
+            const response = await fetch(scriptURL);
+            const data = await response.json();
+            document.getElementById('todo').innerHTML = '';
+            document.getElementById('inprogress').innerHTML = '';
+            document.getElementById('done').innerHTML = '';
 
-            try {
-                const response = await fetch(scriptURL);
-                const data = await response.json();
-                
-                // Clear columns
-                document.getElementById('todo').innerHTML = '';
-                document.getElementById('inprogress').innerHTML = '';
-                document.getElementById('done').innerHTML = '';
-
-                data.forEach(task => {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition';
-                    card.innerHTML = `
-                        <h3 class="font-bold text-slate-800">${task.title}</h3>
-                        <p class="text-sm text-slate-500 mt-1">${task.description || ''}</p>
-                    `;
-                    
-                    const statusKey = (task.status || 'todo').toLowerCase().replace(/\s+/g, '');
-                    const target = document.getElementById(statusKey) || document.getElementById('todo');
-                    target.appendChild(card);
-                });
-
-                dot.style.backgroundColor = '#22c55e'; // Green
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                dot.style.backgroundColor = '#ef4444'; // Red
-            } finally {
-                dot.classList.remove('animate-pulse');
-            }
+            data.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200';
+                card.innerHTML = `<h3 class="font-bold">${task.title}</h3><p class="text-sm text-slate-500">${task.description || ''}</p>`;
+                const target = document.getElementById(task.status.toLowerCase().replace(/\s/g, '')) || document.getElementById('todo');
+                target.appendChild(card);
+            });
         }
-
-        // Load data when page opens
         window.onload = fetchFromGoogle;
     </script>
 </body>
