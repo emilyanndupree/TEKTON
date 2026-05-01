@@ -1,201 +1,393 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEKTON | Project Roadmap</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Figtree', sans-serif; background-color: #F4F7F9; overflow: hidden; height: 100vh; }
-        .board-wrapper { display: flex; height: calc(100vh - 80px); padding: 1.5rem; gap: 1.25rem; overflow-x: auto; align-items: flex-start; }
-        .kanban-column { min-width: 320px; width: 320px; flex-shrink: 0; display: flex; flex-direction: column; max-height: 100%; position: relative; }
-        .col-header { font-size: 1.25rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1.25rem; padding-bottom: 0.5rem; border-bottom: 5px solid; display: flex; justify-content: space-between; align-items: center; }
-        .task-card { background: white; border-radius: 14px; padding: 1.25rem; border: 1px solid #E2E8F0; margin-bottom: 1rem; transition: all 0.2s; cursor: pointer; }
-        .task-card:hover { border-color: #6366F1; transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .column-menu { position: absolute; right: 0; top: 45px; background: white; border-radius: 10px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border: 1px solid #E2E8F0; width: 180px; z-index: 100; display: none; padding: 5px; }
-        .column-menu button { width: 100%; text-align: left; padding: 10px 15px; font-size: 0.85rem; font-weight: 700; color: #475569; border-radius: 6px; }
-        .column-menu button:hover { background: #F1F5F9; color: #6366F1; }
-        .overdue-card { background-color: #FFF5F5 !important; border: 2px solid #FEB2B2 !important; }
-        .overdue-badge { background: #EF4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-bottom: 8px; display: inline-block; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEKTON | Project Roadmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Figtree', sans-serif;
+      background-color: #F4F7F9;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .board-wrapper {
+      display: flex;
+      height: calc(100vh - 80px);
+      padding: 1.5rem;
+      gap: 1.25rem;
+      overflow-x: auto;
+      align-items: flex-start;
+    }
+
+    .kanban-column {
+      min-width: 320px;
+      width: 320px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      max-height: 100%;
+      position: relative;
+    }
+
+    .col-header {
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 5px solid;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .task-card {
+      background: white;
+      border-radius: 14px;
+      padding: 1.25rem;
+      border: 1px solid #E2E8F0;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .task-card:hover {
+      border-color: #6366F1;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .column-menu {
+      position: absolute;
+      right: 0;
+      top: 45px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+      border: 1px solid #E2E8F0;
+      width: 180px;
+      z-index: 100;
+      display: none;
+      padding: 5px;
+    }
+
+    .column-menu button {
+      width: 100%;
+      text-align: left;
+      padding: 10px 15px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      border-radius: 6px;
+    }
+
+    .column-menu button:hover {
+      background: #F1F5F9;
+      color: #6366F1;
+    }
+
+    .overdue-card {
+      background-color: #FFF5F5 !important;
+      border: 2px solid #FEB2B2 !important;
+    }
+
+    .overdue-badge {
+      background: #EF4444;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
 </head>
 <body class="flex flex-col">
 
-    <header class="bg-white border-b px-8 py-4 flex justify-between items-center shrink-0 h-[80px]">
-        <div class="flex items-center gap-4">
-            <div class="bg-indigo-600 p-2.5 rounded-lg text-white font-bold italic">T</div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight uppercase">TEKTON</h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div id="syncStatus" class="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full border">
-                <span id="dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Sync</span>
-            </div>
-            <button onclick="openModal()" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-indigo-700 shadow-lg active:scale-95 transition">
-                🔨 Add Task
-            </button>
-        </div>
-    </header>
-
-    <main class="board-wrapper no-scrollbar" id="boardContainer"></main>
-
-    <div id="taskModal" class="hidden fixed inset-0 bg-slate-900/70 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="px-8 py-5 border-b flex justify-between items-center bg-white">
-                <button id="completeBtn" onclick="markAsDone()" class="px-5 py-2 border-2 border-indigo-600 text-indigo-600 rounded-xl font-bold text-xs uppercase hover:bg-indigo-50 transition">✓ Complete Task</button>
-                <button onclick="closeModal()" class="text-4xl text-slate-300 hover:text-slate-600 transition">&times;</button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 overflow-y-auto">
-                <div class="p-10 space-y-8 border-r border-slate-50">
-                    <div>
-                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block mb-2">Headline</label>
-                        <input id="taskTitle" type="text" placeholder="Entry Title..." class="w-full text-4xl font-black outline-none border-b-4 border-transparent focus:border-indigo-100 tracking-tight">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block mb-2">Description</label>
-                        <textarea id="taskDesc" placeholder="Project details..." class="w-full h-56 bg-slate-50 p-6 rounded-2xl outline-none resize-none text-slate-600 text-lg leading-relaxed"></textarea>
-                    </div>
-                </div>
-
-                <div class="p-10 bg-slate-50/50 space-y-10">
-                    <div>
-                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-3">📅 Due Date</label>
-                        <input id="taskDue" type="date" class="w-full p-4 bg-white border rounded-xl font-bold text-slate-700 outline-none shadow-sm focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-3">🔄 Dependencies</label>
-                        <select id="taskDep" class="w-full p-4 bg-white border rounded-xl font-bold text-slate-500 outline-none cursor-pointer shadow-sm">
-                            <option>🔓 Independent</option>
-                            <option>🚧 Waiting on Materials</option>
-                            <option>🪵 Must finish before next step</option>
-                        </select>
-                    </div>
-                    <div id="trackerBox" class="bg-indigo-600 rounded-3xl p-8 text-white shadow-xl transition-all duration-500">
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-2">Duration Tracking</p>
-                        <h4 id="timeTrack" class="text-3xl font-black italic">00:00:00</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-10 py-6 border-t bg-white flex justify-end gap-6 shrink-0">
-                <button onclick="closeModal()" class="font-bold text-slate-400 text-xs uppercase tracking-widest">Cancel</button>
-                <button id="submitBtn" onclick="submitTask()" class="bg-indigo-600 text-white px-12 py-4 rounded-full font-black uppercase tracking-widest shadow-2xl hover:bg-indigo-700 transition active:scale-95">Forge Task</button>
-            </div>
-        </div>
+  <header class="bg-white border-b px-8 py-4 flex justify-between items-center shrink-0 h-[80px]">
+    <div class="flex items-center gap-4">
+      <div class="bg-indigo-600 p-2.5 rounded-lg text-white font-bold italic">T</div>
+      <h1 class="text-2xl font-black text-slate-800 tracking-tight uppercase">TEKTON</h1>
     </div>
 
-    <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxAy5A55LmmRqrwI-zCXQr-hCfPCsvg4G4nPR8vNGMWPnFJQpiyS9LCFmpycK7AXZ0Waw/exec';
+    <div class="flex items-center gap-4">
+      <div id="syncStatus" class="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full border">
+        <span id="dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+        <span id="syncText" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Sync</span>
+      </div>
 
-        const phases = [
-            { id: 'initiation', name: 'Initiation', color: '#17d1c1' },
-            { id: 'planning', name: 'Planning', color: '#00a2ed' },
-            { id: 'resources', name: 'Resources', color: '#4a69ff' },
-            { id: 'execution', name: 'Execution', color: '#a882ff' },
-            { id: 'monitoring', name: 'Monitoring', color: '#f0506e' },
-            { id: 'closing', name: 'Closing', color: '#92d000' }
-        ];
+      <button onclick="openModal()" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-indigo-700 shadow-lg active:scale-95 transition">
+        Add Task
+      </button>
+    </div>
+  </header>
 
-        function openModal() { document.getElementById('taskModal').classList.remove('hidden'); }
-        function closeModal() { 
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDesc').value = '';
-            document.getElementById('taskDue').value = '';
-            document.getElementById('taskModal').classList.add('hidden'); 
+  <main class="board-wrapper no-scrollbar" id="boardContainer"></main>
+
+  <div id="taskModal" class="hidden fixed inset-0 bg-slate-900/70 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div class="px-8 py-5 border-b flex justify-between items-center bg-white">
+        <button id="completeBtn" onclick="markAsDone()" class="px-5 py-2 border-2 border-indigo-600 text-indigo-600 rounded-xl font-bold text-xs uppercase hover:bg-indigo-50 transition">
+          Complete Task
+        </button>
+        <button onclick="closeModal()" class="text-4xl text-slate-300 hover:text-slate-600 transition">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 overflow-y-auto">
+        <div class="p-10 space-y-8 border-r border-slate-50">
+          <div>
+            <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block mb-2">Headline</label>
+            <input id="taskTitle" type="text" placeholder="Entry Title..." class="w-full text-4xl font-black outline-none border-b-4 border-transparent focus:border-indigo-100 tracking-tight">
+          </div>
+
+          <div>
+            <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block mb-2">Description</label>
+            <textarea id="taskDesc" placeholder="Project details..." class="w-full h-56 bg-slate-50 p-6 rounded-2xl outline-none resize-none text-slate-600 text-lg leading-relaxed"></textarea>
+          </div>
+        </div>
+
+        <div class="p-10 bg-slate-50/50 space-y-10">
+          <div>
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-3">Due Date</label>
+            <input id="taskDue" type="date" class="w-full p-4 bg-white border rounded-xl font-bold text-slate-700 outline-none shadow-sm focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-3">Dependencies</label>
+            <select id="taskDep" class="w-full p-4 bg-white border rounded-xl font-bold text-slate-500 outline-none cursor-pointer shadow-sm">
+              <option>Independent</option>
+              <option>Waiting on Materials</option>
+              <option>Must finish before next step</option>
+            </select>
+          </div>
+
+          <div id="trackerBox" class="bg-indigo-600 rounded-3xl p-8 text-white shadow-xl transition-all duration-500">
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-2">Duration Tracking</p>
+            <h4 id="timeTrack" class="text-3xl font-black italic">00:00:00</h4>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-10 py-6 border-t bg-white flex justify-end gap-6 shrink-0">
+        <button onclick="closeModal()" class="font-bold text-slate-400 text-xs uppercase tracking-widest">Cancel</button>
+        <button id="submitBtn" onclick="submitTask()" class="bg-indigo-600 text-white px-12 py-4 rounded-full font-black uppercase tracking-widest shadow-2xl hover:bg-indigo-700 transition active:scale-95">
+          Forge Task
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwEhVgSgsArbqdPMC25SoU8MGS75lJ9fybrvPD--X6YOtckALWik1wGSv0M2bt-hUF4/exec";
+
+    const phases = [
+      { id: "initiation", name: "Initiation", color: "#17d1c1" },
+      { id: "planning", name: "Planning", color: "#00a2ed" },
+      { id: "resources", name: "Resources", color: "#4a69ff" },
+      { id: "execution", name: "Execution", color: "#a882ff" },
+      { id: "monitoring", name: "Monitoring", color: "#f0506e" },
+      { id: "closing", name: "Closing", color: "#92d000" }
+    ];
+
+    function setSyncStatus(text, dotClass) {
+      document.getElementById("syncText").innerText = text;
+      const dot = document.getElementById("dot");
+      dot.className = "w-2.5 h-2.5 rounded-full " + dotClass;
+    }
+
+    function openModal() {
+      document.getElementById("taskModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("taskTitle").value = "";
+      document.getElementById("taskDesc").value = "";
+      document.getElementById("taskDue").value = "";
+      document.getElementById("taskDep").selectedIndex = 0;
+      document.getElementById("taskModal").classList.add("hidden");
+      document.getElementById("trackerBox").classList.remove("bg-emerald-600");
+      document.getElementById("trackerBox").classList.add("bg-indigo-600");
+      document.getElementById("timeTrack").innerText = "00:00:00";
+    }
+
+    function toggleColumnMenu(phaseId) {
+      const menu = document.getElementById("menu-" + phaseId);
+      const isVisible = menu.style.display === "block";
+      document.querySelectorAll(".column-menu").forEach(function(m) {
+        m.style.display = "none";
+      });
+      menu.style.display = isVisible ? "none" : "block";
+    }
+
+    function markAsDone() {
+      document.getElementById("trackerBox").classList.remove("bg-indigo-600");
+      document.getElementById("trackerBox").classList.add("bg-emerald-600");
+      document.getElementById("timeTrack").innerText = "FORGED";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.innerText = text == null ? "" : text;
+      return div.innerHTML;
+    }
+
+    function renderBoardShell() {
+      const container = document.getElementById("boardContainer");
+      container.innerHTML = "";
+
+      phases.forEach(function(p) {
+        container.innerHTML += `
+          <div class="kanban-column">
+            <div class="col-header" style="border-color: ${p.color}; color: #1e293b;">
+              <span>${p.name}</span>
+              <button id="dots-${p.id}" onclick="toggleColumnMenu('${p.id}')" class="hidden text-slate-300 font-bold hover:text-slate-500">•••</button>
+              <div id="menu-${p.id}" class="column-menu">
+                <button onclick="alert('Sort feature can be added next')">Sort by Date</button>
+                <button onclick="alert('Clear feature can be added next')">Clear Column</button>
+              </div>
+            </div>
+            <div id="${p.id}" class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-4">
+              <div class="placeholder border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-[10px] uppercase font-bold text-slate-300">
+                Enter task title
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    async function fetchFromGoogle() {
+      renderBoardShell();
+      setSyncStatus("Loading", "bg-yellow-500 animate-pulse");
+
+      try {
+        const response = await fetch(scriptURL);
+
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
         }
 
-        function toggleColumnMenu(phaseId) {
-            const menu = document.getElementById(`menu-${phaseId}`);
-            const isVisible = menu.style.display === 'block';
-            document.querySelectorAll('.column-menu').forEach(m => m.style.display = 'none');
-            menu.style.display = isVisible ? 'none' : 'block';
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
         }
 
-        function markAsDone() {
-            document.getElementById('trackerBox').classList.replace('bg-indigo-600', 'bg-emerald-600');
-            document.getElementById('timeTrack').innerText = "FORGED";
-        }
+        const now = new Date();
 
-        async function fetchFromGoogle() {
-            const container = document.getElementById('boardContainer');
-            container.innerHTML = '';
-            phases.forEach(p => {
-                container.innerHTML += `
-                    <div class="kanban-column">
-                        <div class="col-header" style="border-color: ${p.color}; color: #1e293b;">
-                            <span>${p.name}</span>
-                            <button id="dots-${p.id}" onclick="toggleColumnMenu('${p.id}')" class="hidden text-slate-300 font-bold hover:text-slate-500">•••</button>
-                            <div id="menu-${p.id}" class="column-menu">
-                                <button onclick="alert('Sorting...')">Sort by Date</button>
-                                <button onclick="alert('Clearing...')">Clear Column</button>
-                            </div>
-                        </div>
-                        <div id="${p.id}" class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-4">
-                            <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-[10px] uppercase font-bold text-slate-300">Enter task title</div>
-                        </div>
-                    </div>`;
-            });
+        data.forEach(function(task) {
+          const status = (task.status || "initiation").toString().toLowerCase().trim();
+          const column = document.getElementById(status);
 
-            try {
-                const response = await fetch(scriptURL);
-                const data = await response.json();
-                const now = new Date();
-                
-                data.forEach(task => {
-                    const status = (task.status || 'initiation').toLowerCase().trim();
-                    const column = document.getElementById(status);
-                    if (column) {
-                        const placeholder = column.querySelector('div');
-                        if (placeholder && placeholder.innerText.includes('ENTER TASK TITLE')) placeholder.remove();
-                        document.getElementById(`dots-${status}`).classList.remove('hidden');
+          if (!column) return;
 
-                        const isOverdue = task.due_date && status !== 'closing' && new Date(task.due_date) < now;
-                        
-                        column.innerHTML += `
-                            <div class="task-card ${isOverdue ? 'overdue-card' : ''}">
-                                ${isOverdue ? '<span class="overdue-badge">⚠️ OVERDUE</span>' : ''}
-                                <h3 class="font-bold text-slate-800 mb-2 uppercase tracking-tight leading-tight">${task.title}</h3>
-                                <p class="text-sm text-slate-500 line-clamp-3">${task.description || ''}</p>
-                                <div class="flex justify-between items-center mt-4 pt-3 border-t text-[9px] font-black text-slate-300 uppercase">
-                                    <span>👤 Tektōn</span>
-                                    <span>${task.due_date ? '📅 ' + task.due_date : ''}</span>
-                                </div>
-                            </div>`;
-                    }
-                });
-            } catch (e) { console.error(e); }
-        }
+          const placeholder = column.querySelector(".placeholder");
+          if (placeholder) placeholder.remove();
 
-        async function submitTask() {
-            const title = document.getElementById('taskTitle').value;
-            const desc = document.getElementById('taskDesc').value;
-            const due = document.getElementById('taskDue').value;
-            const btn = document.getElementById('submitBtn');
+          const dots = document.getElementById("dots-" + status);
+          if (dots) dots.classList.remove("hidden");
 
-            if(!title) { alert("Title required!"); return; }
-            btn.innerText = "SYNCING..."; btn.disabled = true;
+          let dueDate = null;
+          if (task.due_date) {
+            dueDate = new Date(task.due_date);
+          }
 
-            try {
-                await fetch(`${scriptURL}?title=${encodeURIComponent(title)}&description=${encodeURIComponent(desc)}&due_date=${due}&status=initiation`, {
-                    method: 'POST', mode: 'no-cors'
-                });
-                
-                setTimeout(() => {
-                    closeModal();
-                    fetchFromGoogle();
-                    btn.innerText = "Forge Task";
-                    btn.disabled = false;
-                }, 2000);
-            } catch (e) {
-                alert("Connection failed");
-                btn.disabled = false;
-            }
-        }
-        
-        window.onload = fetchFromGoogle;
-    </script>
+          const isOverdue =
+            dueDate &&
+            !isNaN(dueDate.getTime()) &&
+            status !== "closing" &&
+            dueDate < now;
+
+          const card = document.createElement("div");
+          card.className = "task-card" + (isOverdue ? " overdue-card" : "");
+
+          card.innerHTML = `
+            ${isOverdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+            <h3 class="font-bold text-slate-800 mb-2 uppercase tracking-tight leading-tight">${escapeHtml(task.title || "")}</h3>
+            <p class="text-sm text-slate-500 whitespace-pre-line">${escapeHtml(task.description || "")}</p>
+            <div class="flex justify-between items-center mt-4 pt-3 border-t text-[9px] font-black text-slate-300 uppercase">
+              <span>${escapeHtml(task.creator || "Tekton")}</span>
+              <span>${task.due_date ? "Due: " + escapeHtml(task.due_date) : ""}</span>
+            </div>
+          `;
+
+          column.appendChild(card);
+        });
+
+        setSyncStatus("Live Sync", "bg-green-500 animate-pulse");
+      } catch (error) {
+        console.error("Load error:", error);
+        setSyncStatus("Offline", "bg-red-500");
+        alert("Could not load tasks. Check your Apps Script deployment and URL.");
+      }
+    }
+
+    async function submitTask() {
+      const title = document.getElementById("taskTitle").value.trim();
+      const desc = document.getElementById("taskDesc").value.trim();
+      const due = document.getElementById("taskDue").value;
+      const btn = document.getElementById("submitBtn");
+
+      if (!title) {
+        alert("Title required.");
+        return;
+      }
+
+      btn.innerText = "SYNCING...";
+      btn.disabled = true;
+      setSyncStatus("Saving", "bg-yellow-500 animate-pulse");
+
+      try {
+        const formData = new URLSearchParams();
+        formData.append("title", title);
+        formData.append("description", desc);
+        formData.append("due_date", due);
+        formData.append("status", "initiation");
+        formData.append("creator", "Tekton");
+
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+
+        const resultText = await response.text();
+        console.log("Submit response:", resultText);
+
+        closeModal();
+        await fetchFromGoogle();
+      } catch (error) {
+        console.error("Submit error:", error);
+        setSyncStatus("Offline", "bg-red-500");
+        alert("Could not save task.");
+      } finally {
+        btn.innerText = "Forge Task";
+        btn.disabled = false;
+      }
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById("taskModal");
+      if (event.target === modal) {
+        closeModal();
+      }
+
+      if (!event.target.closest(".kanban-column")) {
+        document.querySelectorAll(".column-menu").forEach(function(menu) {
+          menu.style.display = "none";
+        });
+      }
+    };
+
+    window.onload = fetchFromGoogle;
+  </script>
 </body>
 </html>
