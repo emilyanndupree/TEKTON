@@ -10,26 +10,29 @@
     body {
       font-family: 'Figtree', sans-serif;
       background-color: #F4F7F9;
-      overflow: hidden;
-      height: 100vh;
+      overflow: auto;
+      min-height: 100vh;
     }
+
     .board-wrapper {
       display: flex;
-      height: calc(100vh - 85px);
+      min-height: calc(100vh - 85px);
       padding: 1.5rem;
       gap: 1.25rem;
-      overflow-x: auto;
+      overflow: visible;
       align-items: flex-start;
+      min-width: max-content;
     }
+
     .kanban-column {
       min-width: 320px;
       width: 320px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      max-height: 100%;
       position: relative;
     }
+
     .col-header {
       font-size: 1.15rem;
       font-weight: 900;
@@ -41,17 +44,23 @@
       justify-content: space-between;
       align-items: center;
       letter-spacing: -0.02em;
+      position: sticky;
+      top: 85px;
+      background: #F4F7F9;
+      z-index: 30;
     }
+
     .task-column {
-      flex: 1;
-      overflow-y: auto;
       padding-bottom: 1rem;
       border-radius: 20px;
       transition: background 0.2s ease;
+      min-height: 180px;
     }
+
     .task-column.drag-over {
       background: rgba(99, 102, 241, 0.06);
     }
+
     .task-card {
       background: white;
       border-radius: 16px;
@@ -62,20 +71,41 @@
       cursor: grab;
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
+
     .task-card:hover {
       border-color: #6366F1;
       transform: translateY(-3px);
       box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
     }
+
     .task-card.dragging {
       opacity: 0.45;
       transform: rotate(1deg);
     }
+
     .task-card.completed-card h3,
-    .task-card.completed-card p {
+    .task-card.completed-card p,
+    .task-card.completed-card .desc-line {
       text-decoration: line-through;
       opacity: 0.8;
     }
+
+    .task-card.collapsed-card .collapsible-detail {
+      display: none;
+    }
+
+    .collapse-toggle {
+      border: 0;
+      background: #F1F5F9;
+      color: #64748B;
+      border-radius: 999px;
+      width: 28px;
+      height: 28px;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
     .column-menu {
       position: absolute;
       right: 0;
@@ -84,11 +114,12 @@
       border-radius: 12px;
       box-shadow: 0 10px 15px rgba(0,0,0,0.08);
       border: 1px solid #E2E8F0;
-      width: 190px;
+      width: 210px;
       z-index: 100;
       display: none;
       padding: 6px;
     }
+
     .column-menu button {
       width: 100%;
       text-align: left;
@@ -102,14 +133,17 @@
       border: 0;
       cursor: pointer;
     }
+
     .column-menu button:hover {
       background: #F1F5F9;
       color: #6366F1;
     }
+
     .overdue-card {
       background-color: #FFF5F5 !important;
       border: 2px solid #FEB2B2 !important;
     }
+
     .overdue-badge {
       background: #EF4444;
       color: white;
@@ -120,6 +154,18 @@
       margin-bottom: 8px;
       display: inline-block;
     }
+
+    .upcoming-badge {
+      background: #F59E0B;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
     .meta-pill {
       display: inline-flex;
       align-items: center;
@@ -134,6 +180,7 @@
       border-radius: 999px;
       padding: 6px 9px;
     }
+
     .avatar {
       width: 24px;
       height: 24px;
@@ -147,6 +194,7 @@
       font-weight: 900;
       color: #6366F1;
     }
+
     .placeholder {
       border: 2px dashed #CBD5E1;
       border-radius: 22px;
@@ -159,12 +207,14 @@
       letter-spacing: 0.18em;
       background: rgba(255,255,255,0.45);
     }
+
     .archived-launcher {
       position: fixed;
       right: 20px;
       bottom: 20px;
       z-index: 70;
     }
+
     .archived-button {
       background: #1E293B;
       color: white;
@@ -178,35 +228,7 @@
       cursor: pointer;
       box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
     }
-    .archived-panel {
-      position: fixed;
-      right: 20px;
-      bottom: 72px;
-      width: 360px;
-      max-height: 55vh;
-      overflow-y: auto;
-      background: white;
-      border: 1px solid #E2E8F0;
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
-      padding: 16px;
-      z-index: 80;
-      display: none;
-    }
-    .archived-panel.open {
-      display: block;
-    }
-    .archived-item {
-      background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 12px;
-      cursor: pointer;
-    }
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
+
     .strike-title {
       text-decoration: line-through;
       opacity: 0.7;
@@ -215,9 +237,9 @@
 </head>
 <body class="flex flex-col">
 
-  <header class="bg-white border-b px-8 py-5 flex justify-between items-center shrink-0 h-[85px] z-50">
+  <header class="bg-white border-b px-8 py-5 flex justify-between items-center shrink-0 h-[85px] z-50 sticky top-0">
     <div class="flex items-center gap-5">
-      <div class="bg-indigo-600 p-2.5 rounded-xl text-white font-black italic shadow-lg shadow-indigo-200">T</div>
+      <img src="https://i.ibb.co/VpT09FQ0/Chat-GPT-Image-May-1-2026-12-51-11-PM-1.png" alt="TEKTON" class="w-12 h-12 rounded-xl object-cover shadow-lg">
       <div>
         <h1 class="text-2xl font-black text-slate-800 tracking-tighter uppercase leading-none">TEKTON</h1>
         <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mt-1">Project Roadmap</p>
@@ -233,7 +255,7 @@
     </div>
   </header>
 
-  <main class="board-wrapper no-scrollbar" id="boardContainer"></main>
+  <main class="board-wrapper" id="boardContainer"></main>
 
   <div id="taskModal" class="hidden fixed inset-0 bg-slate-900/80 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
     <div class="bg-white rounded-[32px] w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col border border-white/20 shadow-2xl">
@@ -254,7 +276,10 @@
           </div>
 
           <div class="space-y-4">
-            <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.3em]">Description</label>
+            <div class="flex items-center justify-between gap-4">
+              <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.3em]">Description</label>
+              <button onclick="convertDescriptionToChecklist()" class="px-4 py-2 rounded-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest">Add Checkboxes</button>
+            </div>
             <textarea id="taskDesc" placeholder="Describe the build process..." class="w-full h-64 bg-slate-50/50 p-8 rounded-[32px] outline-none resize-none text-slate-600 text-xl leading-relaxed border-2 border-transparent focus:border-slate-100 transition-all"></textarea>
           </div>
         </div>
@@ -269,6 +294,7 @@
               <option value="execution">Execution</option>
               <option value="monitoring">Monitoring</option>
               <option value="completed">Completed</option>
+              <option value="archived">Archived</option>
             </select>
           </div>
 
@@ -286,6 +312,7 @@
             <div class="absolute -right-4 -top-4 opacity-10 text-8xl">⏱️</div>
             <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-2">Task State</p>
             <h4 id="timeTrack" class="text-3xl font-black italic tracking-tighter">Active</h4>
+            <p id="completionDurationLabel" class="text-xs font-black opacity-80 mt-3 uppercase tracking-widest"></p>
           </div>
         </div>
       </div>
@@ -306,14 +333,7 @@
   </div>
 
   <div class="archived-launcher">
-    <button id="archivedToggle" class="archived-button" onclick="toggleArchivedPanel(event)">Archived</button>
-  </div>
-
-  <div id="archivedPanel" class="archived-panel no-scrollbar">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-black text-slate-800 uppercase tracking-wider">Archived Projects</h3>
-    </div>
-    <div id="archivedList"></div>
+    <button id="archivedToggle" class="archived-button" onclick="toggleArchivedColumn(event)">Archived</button>
   </div>
 
   <script>
@@ -325,12 +345,15 @@
       { id: "resources", name: "Resources", color: "#4a69ff" },
       { id: "execution", name: "Execution", color: "#a882ff" },
       { id: "monitoring", name: "Monitoring", color: "#f0506e" },
-      { id: "completed", name: "Completed", color: "#84cc16" }
+      { id: "completed", name: "Completed", color: "#84cc16" },
+      { id: "archived", name: "Archived", color: "#1e293b", hidden: true }
     ];
 
     let currentTasks = [];
     let draggedTaskId = null;
     let isMovingTask = false;
+    let showArchivedColumn = false;
+    let collapsedCards = JSON.parse(localStorage.getItem("tektonCollapsedCards") || "{}");
 
     function setSyncStatus(text, dotClass) {
       document.getElementById("syncText").innerText = text;
@@ -347,6 +370,47 @@
       return String(value).toLowerCase() === "true";
     }
 
+    function nowIso() {
+      return new Date().toISOString();
+    }
+
+    function todayDateString() {
+      return new Date().toISOString().split("T")[0];
+    }
+
+    function getCreatedAt(task) {
+      return task.created_at || task.created || task.timestamp || task.date_created || "";
+    }
+
+    function formatDurationFromMs(ms) {
+      if (!ms || ms < 0) return "0 minutes";
+      const totalMinutes = Math.floor(ms / 60000);
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
+
+      const parts = [];
+      if (days) parts.push(days + " day" + (days === 1 ? "" : "s"));
+      if (hours) parts.push(hours + " hour" + (hours === 1 ? "" : "s"));
+      if (minutes || parts.length === 0) parts.push(minutes + " minute" + (minutes === 1 ? "" : "s"));
+      return parts.join(", ");
+    }
+
+    function getCompletionDurationText(task) {
+      const createdAt = getCreatedAt(task);
+      const completedAt = task.completed_at || "";
+      const savedDuration = task.completion_duration || "";
+
+      if (savedDuration) return savedDuration;
+      if (!createdAt || !completedAt) return "";
+
+      const start = new Date(createdAt);
+      const end = new Date(completedAt);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return "";
+
+      return formatDurationFromMs(end - start);
+    }
+
     function openCreateModal() {
       document.getElementById("modalModeLabel").innerText = "New Task";
       document.getElementById("taskId").value = "";
@@ -356,6 +420,7 @@
       document.getElementById("taskCreator").value = "";
       document.getElementById("taskDue").value = "";
       document.getElementById("timeTrack").innerText = "Active";
+      document.getElementById("completionDurationLabel").innerText = "";
       document.getElementById("completedTitleLabel").innerText = "";
       document.getElementById("completedTitleLabel").classList.remove("strike-title");
       document.getElementById("taskModal").classList.remove("hidden");
@@ -365,16 +430,19 @@
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return;
 
+      const status = isTruthy(task.archived) ? "archived" : (task.status || "initiation").toLowerCase().trim();
+      const completed = isTruthy(task.completed) || status === "completed";
+      const durationText = getCompletionDurationText(task);
+
       document.getElementById("modalModeLabel").innerText = "Edit Task";
       document.getElementById("taskId").value = task.task_id || "";
       document.getElementById("taskTitle").value = task.title || "";
       document.getElementById("taskDesc").value = task.description || "";
-      document.getElementById("taskStatus").value = (task.status || "initiation").toLowerCase().trim();
+      document.getElementById("taskStatus").value = status;
       document.getElementById("taskCreator").value = task.creator || "";
       document.getElementById("taskDue").value = task.due_date || "";
-
-      const completed = isTruthy(task.completed) || (task.status || "").toLowerCase().trim() === "completed";
-      document.getElementById("timeTrack").innerText = completed ? "Complete" : "Active";
+      document.getElementById("timeTrack").innerText = completed ? "Complete" : status === "archived" ? "Archived" : "Active";
+      document.getElementById("completionDurationLabel").innerText = durationText ? "Completed in " + durationText : "";
       document.getElementById("completedTitleLabel").innerText = task.title || "";
       document.getElementById("completedTitleLabel").classList.toggle("strike-title", completed);
 
@@ -392,11 +460,18 @@
       menu.style.display = isVisible ? "none" : "block";
     }
 
+    function toggleCardCollapse(event, taskId) {
+      event.stopPropagation();
+      collapsedCards[taskId] = !collapsedCards[taskId];
+      localStorage.setItem("tektonCollapsedCards", JSON.stringify(collapsedCards));
+      renderTasks(currentTasks);
+    }
+
     function renderBoardShell() {
       const container = document.getElementById("boardContainer");
       container.innerHTML = "";
 
-      phases.forEach(p => {
+      phases.filter(p => !p.hidden || showArchivedColumn).forEach(p => {
         container.innerHTML += `
           <div class="kanban-column">
             <div class="col-header" style="border-color: ${p.color}; color: #1e293b;">
@@ -407,7 +482,7 @@
                 <button onclick="refreshBoard()">Refresh Column</button>
               </div>
             </div>
-            <div id="${p.id}" class="task-column no-scrollbar space-y-4"
+            <div id="${p.id}" class="task-column space-y-4"
                  ondragover="allowDrop(event)"
                  ondragleave="handleDragLeave(event)"
                  ondrop="dropTask(event, '${p.id}')">
@@ -428,8 +503,31 @@
       });
     }
 
+    function renderDescription(task) {
+      const desc = task.description || "";
+      const lines = desc.split("\n");
+
+      return lines.map((line, index) => {
+        const checked = line.trim().startsWith("- [x]");
+        const unchecked = line.trim().startsWith("- [ ]");
+
+        if (checked || unchecked) {
+          const text = line.replace("- [x]", "").replace("- [ ]", "").trim();
+          return `
+            <label class="flex gap-2 items-start text-sm text-slate-500 font-medium mt-2 cursor-pointer">
+              <input type="checkbox" ${checked ? "checked" : ""} onclick="event.stopPropagation(); toggleChecklistLine('${task.task_id}', ${index})" class="mt-1">
+              <span class="desc-line ${checked ? "line-through opacity-60" : ""}">${escapeHtml(text)}</span>
+            </label>
+          `;
+        }
+
+        return `<p class="desc-line text-sm text-slate-500 font-medium leading-relaxed mt-2">${escapeHtml(line)}</p>`;
+      }).join("");
+    }
+
     function renderTasks(tasks) {
-      const now = new Date();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
       document.querySelectorAll(".task-column").forEach(column => {
         column.innerHTML = '<div class="placeholder">Phase Empty</div>';
@@ -438,53 +536,71 @@
       const seen = new Set();
 
       tasks
-        .filter(task => !isTruthy(task.archived))
+        .filter(task => showArchivedColumn || !isTruthy(task.archived))
         .forEach(task => {
           const taskId = String(task.task_id || "").trim();
           if (!taskId || seen.has(taskId)) return;
           seen.add(taskId);
 
-          const status = (task.status || "initiation").toLowerCase().trim();
+          const status = isTruthy(task.archived) ? "archived" : (task.status || "initiation").toLowerCase().trim();
           const column = document.getElementById(status);
           if (!column) return;
 
           const placeholder = column.querySelector(".placeholder");
           if (placeholder) placeholder.remove();
 
-          const dueDate = task.due_date ? new Date(task.due_date) : null;
-          const completed = isTruthy(task.completed) || status === "completed";
-          const isOverdue = dueDate && !isNaN(dueDate.getTime()) && !completed && dueDate < now;
+          const dueDate = task.due_date ? new Date(task.due_date + "T00:00:00") : null;
+          const completed = isTruthy(task.completed) || status === "completed" || status === "archived";
+
+          let dueState = "";
+          if (dueDate && !isNaN(dueDate.getTime()) && !completed) {
+            if (dueDate < today) dueState = "overdue";
+            else if (dueDate.getTime() === today.getTime()) dueState = "upcoming";
+          }
 
           const card = document.createElement("div");
-          card.className = "task-card" + (isOverdue ? " overdue-card" : "") + (completed ? " completed-card" : "");
+          card.className = "task-card" +
+            (dueState === "overdue" ? " overdue-card" : "") +
+            (completed ? " completed-card" : "") +
+            (collapsedCards[taskId] ? " collapsed-card" : "");
           card.draggable = true;
           card.dataset.taskId = taskId;
           card.ondragstart = function(e) { dragTask(e, taskId); };
           card.ondragend = function() { endDrag(); };
           card.onclick = function(e) {
-            if (!e.target.closest(".card-handle")) {
+            if (!e.target.closest(".card-handle") && !e.target.closest(".collapse-toggle")) {
               openEditModal(taskId);
             }
           };
 
           const creator = task.creator || "";
           const creatorInitial = creator ? creator.charAt(0).toUpperCase() : "?";
+          const durationText = getCompletionDurationText(task);
 
           card.innerHTML = `
-            ${isOverdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+            ${dueState === "overdue" ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+            ${dueState === "upcoming" ? '<span class="upcoming-badge">UPCOMING</span>' : ''}
             <div class="flex items-start justify-between gap-3">
               <h3 class="font-black text-slate-800 uppercase tracking-tight leading-tight text-base">${escapeHtml(task.title || "")}</h3>
-              <span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>
+              <div class="flex items-center gap-2">
+                <button class="collapse-toggle" onclick="toggleCardCollapse(event, '${taskId}')">${collapsedCards[taskId] ? "+" : "−"}</button>
+                <span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>
+              </div>
             </div>
-            <p class="text-sm text-slate-500 font-medium leading-relaxed mt-2 whitespace-pre-line">${escapeHtml(task.description || "")}</p>
-            <div class="flex flex-wrap gap-2 mt-4">
-              ${task.due_date ? `<span class="meta-pill">Due ${escapeHtml(task.due_date)}</span>` : ""}
-              <span class="meta-pill">${escapeHtml(status)}</span>
-            </div>
-            <div class="flex justify-between items-center mt-5 pt-4 border-t border-slate-100">
+
+            <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
               <div class="flex items-center gap-2">
                 <div class="avatar">${escapeHtml(creatorInitial)}</div>
                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${escapeHtml(creator)}</span>
+              </div>
+            </div>
+
+            <div class="collapsible-detail">
+              <div class="mt-2">${renderDescription(task)}</div>
+              <div class="flex flex-wrap gap-2 mt-4">
+                ${task.due_date ? `<span class="meta-pill">Due ${escapeHtml(task.due_date)}</span>` : ""}
+                <span class="meta-pill">${escapeHtml(status)}</span>
+                ${durationText && status === "completed" ? `<span class="meta-pill">Completed in ${escapeHtml(durationText)}</span>` : ""}
               </div>
             </div>
           `;
@@ -492,36 +608,7 @@
           column.appendChild(card);
         });
 
-      renderArchivedTasks(tasks.filter(task => isTruthy(task.archived)));
       cleanupEmptyColumns();
-    }
-
-    function renderArchivedTasks(tasks) {
-      const list = document.getElementById("archivedList");
-      list.innerHTML = "";
-
-      if (!tasks.length) {
-        list.innerHTML = '<div class="text-sm font-bold text-slate-400">No archived projects.</div>';
-        return;
-      }
-
-      tasks.forEach(task => {
-        const item = document.createElement("div");
-        item.className = "archived-item";
-        item.innerHTML = `
-          <div class="font-black text-slate-800 uppercase tracking-tight">${escapeHtml(task.title || "")}</div>
-          <div class="text-sm text-slate-500 mt-1">${escapeHtml(task.description || "")}</div>
-          <div class="flex flex-wrap gap-2 mt-3">
-            <span class="meta-pill">${escapeHtml(task.status || "")}</span>
-            ${task.archived_at ? `<span class="meta-pill">Archived ${escapeHtml(task.archived_at)}</span>` : ""}
-          </div>
-        `;
-        item.onclick = function() {
-          openEditModal(task.task_id);
-          closeArchivedPanel();
-        };
-        list.appendChild(item);
-      });
     }
 
     async function fetchFromGoogle() {
@@ -571,10 +658,36 @@
         const formData = new URLSearchParams();
 
         if (taskId) {
+          const existingTask = currentTasks.find(t => String(t.task_id) === String(taskId));
+          const wasCompleted = existingTask && (isTruthy(existingTask.completed) || String(existingTask.status).toLowerCase().trim() === "completed");
+          const nowCompleted = status === "completed";
+          const createdAt = existingTask ? getCreatedAt(existingTask) : "";
+
           formData.append("action", "update");
           formData.append("task_id", taskId);
+
+          if (!wasCompleted && nowCompleted) {
+            const completedAt = nowIso();
+            formData.append("completed", "true");
+            formData.append("completed_at", completedAt);
+            if (createdAt) {
+              formData.append("completion_duration", formatDurationFromMs(new Date(completedAt) - new Date(createdAt)));
+            }
+          }
+
+          if (wasCompleted && !nowCompleted) {
+            formData.append("completed", "false");
+            formData.append("completed_at", "");
+            formData.append("completion_duration", "");
+          }
         } else {
           formData.append("action", "create");
+          formData.append("created_at", nowIso());
+          formData.append("completed", status === "completed" ? "true" : "false");
+          if (status === "completed") {
+            formData.append("completed_at", nowIso());
+            formData.append("completion_duration", "0 minutes");
+          }
         }
 
         formData.append("title", title);
@@ -582,6 +695,7 @@
         formData.append("status", status);
         formData.append("creator", creator);
         formData.append("due_date", dueDate);
+        formData.append("archived", status === "archived" ? "true" : "false");
 
         const response = await fetch(scriptURL, {
           method: "POST",
@@ -609,6 +723,7 @@
         document.getElementById("taskStatus").value = "completed";
         document.getElementById("completedTitleLabel").innerText = document.getElementById("taskTitle").value.trim();
         document.getElementById("completedTitleLabel").classList.add("strike-title");
+        document.getElementById("timeTrack").innerText = "Complete";
         return;
       }
 
@@ -617,12 +732,18 @@
 
       const currentlyCompleted = isTruthy(task.completed) || (task.status || "").toLowerCase().trim() === "completed";
       const nextCompleted = !currentlyCompleted;
+      const completedAt = nextCompleted ? nowIso() : "";
+      const createdAt = getCreatedAt(task);
+      const duration = nextCompleted && createdAt ? formatDurationFromMs(new Date(completedAt) - new Date(createdAt)) : "";
 
       try {
         const formData = new URLSearchParams();
-        formData.append("action", "complete");
+        formData.append("action", "update");
         formData.append("task_id", taskId);
         formData.append("completed", String(nextCompleted));
+        formData.append("status", nextCompleted ? "completed" : "monitoring");
+        formData.append("completed_at", completedAt);
+        formData.append("completion_duration", duration);
 
         const response = await fetch(scriptURL, {
           method: "POST",
@@ -636,6 +757,7 @@
         document.getElementById("completedTitleLabel").classList.toggle("strike-title", nextCompleted);
         document.getElementById("taskStatus").value = nextCompleted ? "completed" : "monitoring";
         document.getElementById("timeTrack").innerText = nextCompleted ? "Complete" : "Active";
+        document.getElementById("completionDurationLabel").innerText = duration ? "Completed in " + duration : "";
 
         await fetchFromGoogle();
       } catch (error) {
@@ -652,10 +774,14 @@
       }
 
       try {
+        setSyncStatus("Archiving", "bg-yellow-500 animate-pulse");
+
         const formData = new URLSearchParams();
-        formData.append("action", "archive");
+        formData.append("action", "update");
         formData.append("task_id", taskId);
         formData.append("archived", "true");
+        formData.append("status", "archived");
+        formData.append("archived_at", todayDateString());
 
         const response = await fetch(scriptURL, {
           method: "POST",
@@ -666,10 +792,11 @@
         if (!result.success) throw new Error(result.error || "Archive failed");
 
         closeModal();
+        showArchivedColumn = true;
         await fetchFromGoogle();
-        openArchivedPanel();
       } catch (error) {
         console.error("Archive error:", error);
+        setSyncStatus("Offline", "bg-red-500");
         alert("Could not archive task.");
       }
     }
@@ -714,7 +841,7 @@
         return;
       }
 
-      const oldStatus = (task.status || "").toLowerCase().trim();
+      const oldStatus = isTruthy(task.archived) ? "archived" : (task.status || "").toLowerCase().trim();
       if (oldStatus === newStatus) {
         endDrag();
         return;
@@ -730,22 +857,31 @@
       setSyncStatus("Moving", "bg-yellow-500 animate-pulse");
 
       try {
+        const wasCompleted = oldStatus === "completed" || isTruthy(task.completed);
+        const nowCompleted = newStatus === "completed";
+        const completedAt = nowCompleted && !wasCompleted ? nowIso() : (nowCompleted ? task.completed_at || nowIso() : "");
+        const createdAt = getCreatedAt(task);
+        const duration = nowCompleted && completedAt && createdAt ? formatDurationFromMs(new Date(completedAt) - new Date(createdAt)) : "";
+
         const placeholder = column.querySelector(".placeholder");
         if (placeholder) placeholder.remove();
 
         column.appendChild(draggedCard);
         task.status = newStatus;
-        task.completed = newStatus === "completed";
-
-        const statusPill = draggedCard.querySelector(".meta-pill:last-child");
-        if (statusPill) statusPill.textContent = newStatus;
-
-        draggedCard.classList.toggle("completed-card", newStatus === "completed");
+        task.completed = nowCompleted;
+        task.archived = newStatus === "archived";
+        task.completed_at = completedAt;
+        task.completion_duration = duration;
 
         const formData = new URLSearchParams();
-        formData.append("action", "move");
+        formData.append("action", "update");
         formData.append("task_id", taskId);
         formData.append("status", newStatus);
+        formData.append("archived", String(newStatus === "archived"));
+        formData.append("completed", String(nowCompleted));
+        formData.append("completed_at", completedAt);
+        formData.append("completion_duration", duration);
+        if (newStatus === "archived") formData.append("archived_at", todayDateString());
 
         const response = await fetch(scriptURL, {
           method: "POST",
@@ -756,10 +892,9 @@
         if (!result.success) throw new Error(result.error || "Move failed");
 
         setSyncStatus("Live Sync", "bg-green-500 animate-pulse");
-        cleanupEmptyColumns();
+        await fetchFromGoogle();
       } catch (error) {
         console.error("Move error:", error);
-        task.status = oldStatus;
         await fetchFromGoogle();
         setSyncStatus("Offline", "bg-red-500");
         alert("Could not move task.");
@@ -772,8 +907,10 @@
 
     function sortColumnByDueDate(columnId) {
       const sorted = [...currentTasks].sort((a, b) => {
-        const aMatch = (a.status || "").toLowerCase().trim() === columnId;
-        const bMatch = (b.status || "").toLowerCase().trim() === columnId;
+        const aStatus = isTruthy(a.archived) ? "archived" : (a.status || "").toLowerCase().trim();
+        const bStatus = isTruthy(b.archived) ? "archived" : (b.status || "").toLowerCase().trim();
+        const aMatch = aStatus === columnId;
+        const bMatch = bStatus === columnId;
         if (!aMatch && !bMatch) return 0;
         if (aMatch && !bMatch) return -1;
         if (!aMatch && bMatch) return 1;
@@ -791,18 +928,52 @@
       fetchFromGoogle();
     }
 
-    function toggleArchivedPanel(event) {
+    function toggleArchivedColumn(event) {
       if (event) event.stopPropagation();
-      const panel = document.getElementById("archivedPanel");
-      panel.classList.toggle("open");
+      showArchivedColumn = !showArchivedColumn;
+      renderBoardShell();
+      renderTasks(currentTasks);
     }
 
-    function openArchivedPanel() {
-      document.getElementById("archivedPanel").classList.add("open");
+    function convertDescriptionToChecklist() {
+      const textarea = document.getElementById("taskDesc");
+      const lines = textarea.value.split("\n");
+
+      textarea.value = lines
+        .map(line => {
+          const clean = line.trim();
+          if (!clean) return "";
+          if (clean.startsWith("- [ ]") || clean.startsWith("- [x]")) return line;
+          return "- [ ] " + clean;
+        })
+        .join("\n");
     }
 
-    function closeArchivedPanel() {
-      document.getElementById("archivedPanel").classList.remove("open");
+    async function toggleChecklistLine(taskId, lineIndex) {
+      const task = currentTasks.find(t => String(t.task_id) === String(taskId));
+      if (!task) return;
+
+      const lines = (task.description || "").split("\n");
+
+      if (lines[lineIndex].trim().startsWith("- [x]")) {
+        lines[lineIndex] = lines[lineIndex].replace("- [x]", "- [ ]");
+      } else if (lines[lineIndex].trim().startsWith("- [ ]")) {
+        lines[lineIndex] = lines[lineIndex].replace("- [ ]", "- [x]");
+      }
+
+      task.description = lines.join("\n");
+
+      const formData = new URLSearchParams();
+      formData.append("action", "update");
+      formData.append("task_id", taskId);
+      formData.append("description", task.description);
+
+      await fetch(scriptURL, {
+        method: "POST",
+        body: formData
+      });
+
+      renderTasks(currentTasks);
     }
 
     window.onclick = function(event) {
@@ -813,10 +984,6 @@
         document.querySelectorAll(".column-menu").forEach(menu => {
           menu.style.display = "none";
         });
-      }
-
-      if (!event.target.closest("#archivedPanel") && !event.target.closest("#archivedToggle")) {
-        closeArchivedPanel();
       }
     };
 
