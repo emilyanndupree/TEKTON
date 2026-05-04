@@ -295,7 +295,11 @@
           <div class="space-y-4">
             <div class="flex items-center justify-between gap-4">
               <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.3em]">Description</label>
-              <button onclick="convertDescriptionToChecklist()" class="px-4 py-2 rounded-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest">Add Checkboxes</button>
+              <div class="flex items-center gap-2">
+                <button onclick="insertChecklistLine()" class="px-4 py-2 rounded-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest">Checkbox</button>
+                <button onclick="insertBulletLine()" class="px-4 py-2 rounded-full bg-slate-600 text-white font-black text-[10px] uppercase tracking-widest">Bullet</button>
+                <button onclick="insertSubBulletLine()" class="px-4 py-2 rounded-full bg-slate-400 text-white font-black text-[10px] uppercase tracking-widest">Sub Bullet</button>
+              </div>
             </div>
             <textarea id="taskDesc" placeholder="Describe the build process..." class="w-full h-64 bg-slate-50/50 p-8 rounded-[32px] outline-none resize-none text-slate-600 text-xl leading-relaxed border-2 border-transparent focus:border-slate-100 transition-all"></textarea>
           </div>
@@ -506,7 +510,7 @@
 
     function renderDescription(task) {
       const desc = task.description || "";
-      const lines = desc.split("\\n");
+      const lines = desc.split("\n");
 
       return lines.map((line, index) => {
         const checked = line.trim().startsWith("- [x]");
@@ -872,21 +876,52 @@
       fetchFromGoogle();
     }
 
-    function convertDescriptionToChecklist() {
+    function insertDescriptionPrefix(prefix) {
       const textarea = document.getElementById("taskDesc");
-      const lines = textarea.value.split("\\n");
-      textarea.value = lines.map(line => {
-        const clean = line.trim();
-        if (!clean) return "";
-        if (clean.startsWith("- [ ]") || clean.startsWith("- [x]")) return line;
-        return "- [ ] " + clean;
-      }).join("\\n");
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      const selected = value.substring(start, end);
+      const lineStart = value.lastIndexOf("
+", start - 1) + 1;
+      const before = value.substring(0, lineStart);
+      const after = value.substring(lineStart);
+
+      if (selected) {
+        const selectedLines = selected.split("
+").map(line => {
+          if (!line.trim()) return line;
+          return prefix + line.trim();
+        }).join("
+");
+        textarea.value = value.substring(0, start) + selectedLines + value.substring(end);
+      } else {
+        textarea.value = before + prefix + after;
+      }
+
+      textarea.focus();
+    }
+
+    function insertChecklistLine() {
+      insertDescriptionPrefix("- [ ] ");
+    }
+
+    function insertBulletLine() {
+      insertDescriptionPrefix("- ");
+    }
+
+    function insertSubBulletLine() {
+      insertDescriptionPrefix("  - ");
+    }
+
+    function convertDescriptionToChecklist() {
+      insertChecklistLine();
     }
 
     async function toggleChecklistLine(taskId, lineIndex) {
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return;
-      const lines = (task.description || "").split("\\n");
+      const lines = (task.description || "").split("\n");
 
       if (lines[lineIndex].trim().startsWith("- [x]")) {
         lines[lineIndex] = lines[lineIndex].replace("- [x]", "- [ ]");
@@ -894,7 +929,7 @@
         lines[lineIndex] = lines[lineIndex].replace("- [ ]", "- [x]");
       }
 
-      task.description = lines.join("\\n");
+      task.description = lines.join("\n");
       const formData = new URLSearchParams();
       formData.append("action", "update");
       formData.append("task_id", taskId);
