@@ -215,22 +215,30 @@
     }
 
     .sheet-checkbox {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #94A3B8;
-      border-radius: 2px;
-      background: white;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      width: 16px !important;
+      height: 16px !important;
+      min-width: 16px !important;
+      min-height: 16px !important;
+      border: 2px solid #94A3B8 !important;
+      border-radius: 2px !important;
+      background: #FFFFFF !important;
       cursor: pointer;
       margin-top: 2px;
       flex-shrink: 0;
       position: relative;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .sheet-checkbox:hover {
+      border-color: #2563EB !important;
     }
 
     .sheet-checkbox:checked {
-      background: #2563EB;
-      border-color: #2563EB;
+      background: #2563EB !important;
+      border-color: #2563EB !important;
     }
 
     .sheet-checkbox:checked::after {
