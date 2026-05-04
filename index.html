@@ -618,8 +618,9 @@
     }
 
     async function fetchFromGoogle() {
-      setSyncStatus("Syncing", "bg-yellow-500 animate-pulse");
       renderBoardShell();
+      cleanupEmptyColumns();
+      setSyncStatus("Syncing", "bg-yellow-500 animate-pulse");
       try {
         const response = await fetch(scriptURL);
         if (!response.ok) throw new Error("HTTP " + response.status);
@@ -891,7 +892,17 @@
       }
     };
 
-    window.onload = fetchFromGoogle;
+    function startTektonBoard() {
+      renderBoardShell();
+      cleanupEmptyColumns();
+      fetchFromGoogle();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", startTektonBoard);
+    } else {
+      startTektonBoard();
+    }
   </script>
 </body>
 </html>
