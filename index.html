@@ -6,7 +6,6 @@
   <title>TEKTON | Project Masterwork</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-
   <style>
     body {
       font-family: 'Figtree', sans-serif;
@@ -54,8 +53,8 @@
     .task-column {
       padding-bottom: 1rem;
       border-radius: 20px;
-      transition: background 0.2s ease;
       min-height: 180px;
+      transition: background 0.2s ease;
     }
 
     .task-column.drag-over {
@@ -145,8 +144,8 @@
       border: 2px solid #FEB2B2 !important;
     }
 
-    .overdue-badge {
-      background: #EF4444;
+    .overdue-badge,
+    .upcoming-badge {
       color: white;
       padding: 2px 8px;
       border-radius: 999px;
@@ -156,16 +155,8 @@
       display: inline-block;
     }
 
-    .upcoming-badge {
-      background: #F59E0B;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 10px;
-      font-weight: 900;
-      margin-bottom: 8px;
-      display: inline-block;
-    }
+    .overdue-badge { background: #EF4444; }
+    .upcoming-badge { background: #F59E0B; }
 
     .meta-pill {
       display: inline-flex;
@@ -252,9 +243,43 @@
       border-width: 0 2px 2px 0;
       transform: rotate(45deg);
     }
+
+    .desc-bullet {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: #475569;
+      font-size: 0.875rem;
+      line-height: 1.45;
+      font-weight: 600;
+      margin-top: 0.45rem;
+    }
+
+    .desc-bullet::before {
+      content: "•";
+      font-weight: 900;
+      color: #64748B;
+    }
+
+    .desc-sub-bullet {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: #64748B;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      font-weight: 600;
+      margin-top: 0.35rem;
+      margin-left: 1.15rem;
+    }
+
+    .desc-sub-bullet::before {
+      content: "◦";
+      font-weight: 900;
+      color: #94A3B8;
+    }
   </style>
 </head>
-
 <body class="flex flex-col">
   <header class="bg-white border-b px-8 py-5 flex justify-between items-center shrink-0 h-[85px] z-50 sticky top-0">
     <div class="flex items-center gap-5">
@@ -342,7 +367,6 @@
         <div class="flex items-center gap-4">
           <button id="completeBtn" onclick="toggleCompleted()" class="px-5 py-3 rounded-full bg-emerald-600 text-white font-black text-xs uppercase tracking-widest">Completed</button>
           <span id="completedTitleLabel" class="text-sm font-black text-slate-500"></span>
-          <button id="archiveBtn" onclick="archiveTask()" class="px-5 py-3 rounded-full bg-slate-800 text-white font-black text-xs uppercase tracking-widest">Archive</button>
         </div>
 
         <div class="flex gap-6 ml-auto">
@@ -443,7 +467,6 @@
       const status = isTruthy(task.archived) ? "archived" : (task.status || "initiation").toLowerCase().trim();
       const completed = isTruthy(task.completed) || status === "completed";
       const durationText = getCompletionDurationText(task);
-
       document.getElementById("modalModeLabel").innerText = "Edit Task";
       document.getElementById("taskId").value = task.task_id || "";
       document.getElementById("taskTitle").value = task.title || "";
@@ -479,27 +502,23 @@
     function renderBoardShell() {
       const container = document.getElementById("boardContainer");
       container.innerHTML = "";
-      phases.forEach(p => {
-        container.innerHTML += `
-          <div class="kanban-column">
-            <div class="col-header" style="border-color: ${p.color}; color: #1e293b;">
-              <span>${p.name}</span>
-              <button id="dots-${p.id}" onclick="toggleColumnMenu('${p.id}')" class="text-slate-300 font-bold hover:text-slate-600 transition text-2xl">•••</button>
-              <div id="menu-${p.id}" class="column-menu">
-                <button onclick="sortColumnByDueDate('${p.id}')">Sort by Due Date</button>
-                <button onclick="refreshBoard()">Refresh Column</button>
-              </div>
-            </div>
-            <div id="${p.id}" class="task-column space-y-4" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)" ondrop="dropTask(event, '${p.id}')">
-              <div class="placeholder">Phase Empty</div>
-            </div>
-          </div>
-        `;
+      phases.forEach(function(p) {
+        container.innerHTML += '<div class="kanban-column">' +
+          '<div class="col-header" style="border-color: ' + p.color + '; color: #1e293b;">' +
+          '<span>' + p.name + '</span>' +
+          '<button id="dots-' + p.id + '" onclick="toggleColumnMenu(\'' + p.id + '\')" class="text-slate-300 font-bold hover:text-slate-600 transition text-2xl">•••</button>' +
+          '<div id="menu-' + p.id + '" class="column-menu">' +
+          '<button onclick="sortColumnByDueDate(\'' + p.id + '\')">Sort by Due Date</button>' +
+          '<button onclick="refreshBoard()">Refresh Column</button>' +
+          '</div></div>' +
+          '<div id="' + p.id + '" class="task-column space-y-4" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)" ondrop="dropTask(event, \'' + p.id + '\')">' +
+          '<div class="placeholder">Phase Empty</div>' +
+          '</div></div>';
       });
     }
 
     function cleanupEmptyColumns() {
-      document.querySelectorAll(".task-column").forEach(column => {
+      document.querySelectorAll(".task-column").forEach(function(column) {
         const cards = column.querySelectorAll(".task-card");
         const placeholder = column.querySelector(".placeholder");
         if (cards.length === 0 && !placeholder) {
@@ -510,57 +529,56 @@
 
     function renderDescription(task) {
       const desc = task.description || "";
-      const lines = desc.split("\n");
-
-      return lines.map((line, index) => {
-        const checked = line.trim().startsWith("- [x]");
-        const unchecked = line.trim().startsWith("- [ ]");
-
+      const lines = desc.split("
+");
+      return lines.map(function(line, index) {
+        const original = line || "";
+        const trimmed = original.trim();
+        const checked = trimmed.startsWith("- [x]");
+        const unchecked = trimmed.startsWith("- [ ]");
+        const isIndented = original.startsWith("  ") || original.startsWith("	") || trimmed.startsWith("--");
+        const isBullet = trimmed.startsWith("-") || trimmed.startsWith("*") || trimmed.startsWith("•");
+        if (!trimmed) return "";
         if (checked || unchecked) {
-          const text = line.replace("- [x]", "").replace("- [ ]", "").trim();
-          return `
-            <label class="flex gap-2 items-start text-sm text-slate-500 font-medium mt-2 cursor-pointer">
-              <input type="checkbox" ${checked ? "checked" : ""} onclick="event.stopPropagation(); toggleChecklistLine('${task.task_id}', ${index})" class="sheet-checkbox">
-              <span class="desc-line ${checked ? "line-through opacity-60" : ""}">${escapeHtml(text)}</span>
-            </label>
-          `;
+          const text = trimmed.replace("- [x]", "").replace("- [ ]", "").trim();
+          return '<label class="flex gap-2 items-start text-sm text-slate-500 font-medium mt-2 cursor-pointer">' +
+            '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onclick="event.stopPropagation(); toggleChecklistLine(\'' + task.task_id + '\', ' + index + ')" class="sheet-checkbox">' +
+            '<span class="desc-line ' + (checked ? 'line-through opacity-60' : '') + '">' + escapeHtml(text) + '</span>' +
+            '</label>';
         }
-
-        return `<p class="desc-line text-sm text-slate-500 font-medium leading-relaxed mt-2">${escapeHtml(line)}</p>`;
+        if (isBullet) {
+          let text = trimmed;
+          text = text.replace(/^-- */, "");
+          text = text.replace(/^[-*•] */, "");
+          return '<div class="desc-line ' + (isIndented ? 'desc-sub-bullet' : 'desc-bullet') + '"><span>' + escapeHtml(text) + '</span></div>';
+        }
+        return '<p class="desc-line text-sm text-slate-500 font-medium leading-relaxed mt-2">' + escapeHtml(original) + '</p>';
       }).join("");
     }
 
     function renderTasks(tasks) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
-      document.querySelectorAll(".task-column").forEach(column => {
+      document.querySelectorAll(".task-column").forEach(function(column) {
         column.innerHTML = '<div class="placeholder">Phase Empty</div>';
       });
-
       const seen = new Set();
-
-      tasks.forEach(task => {
+      tasks.forEach(function(task) {
         const taskId = String(task.task_id || "").trim();
         if (!taskId || seen.has(taskId)) return;
         seen.add(taskId);
-
         const status = isTruthy(task.archived) ? "archived" : (task.status || "initiation").toLowerCase().trim();
         const column = document.getElementById(status);
         if (!column) return;
-
         const placeholder = column.querySelector(".placeholder");
         if (placeholder) placeholder.remove();
-
         const dueDate = task.due_date ? new Date(task.due_date + "T00:00:00") : null;
         const completed = isTruthy(task.completed) || status === "completed" || status === "archived";
-
         let dueState = "";
         if (dueDate && !isNaN(dueDate.getTime()) && !completed) {
           if (dueDate < today) dueState = "overdue";
           else if (dueDate.getTime() === today.getTime()) dueState = "upcoming";
         }
-
         const card = document.createElement("div");
         card.className = "task-card" +
           (dueState === "overdue" ? " overdue-card" : "") +
@@ -571,54 +589,37 @@
         card.ondragstart = function(e) { dragTask(e, taskId); };
         card.ondragend = function() { endDrag(); };
         card.onclick = function(e) {
-          if (!e.target.closest(".card-handle") && !e.target.closest(".collapse-toggle")) {
-            openEditModal(taskId);
-          }
+          if (!e.target.closest(".card-handle") && !e.target.closest(".collapse-toggle")) openEditModal(taskId);
         };
-
         const creator = task.creator || "";
         const creatorInitial = creator ? creator.charAt(0).toUpperCase() : "?";
         const durationText = getCompletionDurationText(task);
-
-        card.innerHTML = `
-          ${dueState === "overdue" ? '<span class="overdue-badge">OVERDUE</span>' : ''}
-          ${dueState === "upcoming" ? '<span class="upcoming-badge">UPCOMING</span>' : ''}
-
-          <div class="flex items-start justify-between gap-3">
-            <h3 class="font-black text-slate-800 uppercase tracking-tight leading-tight text-base">${escapeHtml(task.title || "")}</h3>
-            <div class="flex items-center gap-2">
-              <button class="collapse-toggle" onclick="toggleCardCollapse(event, '${taskId}')">${collapsedCards[taskId] ? "+" : "−"}</button>
-              <span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
-            <div class="flex items-center gap-2">
-              <div class="avatar">${escapeHtml(creatorInitial)}</div>
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${escapeHtml(creator)}</span>
-            </div>
-          </div>
-
-          <div class="collapsible-detail">
-            <div class="mt-2">${renderDescription(task)}</div>
-            <div class="flex flex-wrap gap-2 mt-4">
-              ${task.due_date ? `<span class="meta-pill">Due ${escapeHtml(task.due_date)}</span>` : ""}
-              <span class="meta-pill">${escapeHtml(status)}</span>
-              ${durationText && status === "completed" ? `<span class="meta-pill">Completed in ${escapeHtml(durationText)}</span>` : ""}
-            </div>
-          </div>
-        `;
-
+        card.innerHTML =
+          (dueState === "overdue" ? '<span class="overdue-badge">OVERDUE</span>' : '') +
+          (dueState === "upcoming" ? '<span class="upcoming-badge">UPCOMING</span>' : '') +
+          '<div class="flex items-start justify-between gap-3">' +
+          '<h3 class="font-black text-slate-800 uppercase tracking-tight leading-tight text-base">' + escapeHtml(task.title || "") + '</h3>' +
+          '<div class="flex items-center gap-2">' +
+          '<button class="collapse-toggle" onclick="toggleCardCollapse(event, \'' + taskId + '\')">' + (collapsedCards[taskId] ? '+' : '−') + '</button>' +
+          '<span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>' +
+          '</div></div>' +
+          '<div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">' +
+          '<div class="flex items-center gap-2"><div class="avatar">' + escapeHtml(creatorInitial) + '</div>' +
+          '<span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">' + escapeHtml(creator) + '</span></div></div>' +
+          '<div class="collapsible-detail"><div class="mt-2">' + renderDescription(task) + '</div>' +
+          '<div class="flex flex-wrap gap-2 mt-4">' +
+          (task.due_date ? '<span class="meta-pill">Due ' + escapeHtml(task.due_date) + '</span>' : '') +
+          '<span class="meta-pill">' + escapeHtml(status) + '</span>' +
+          (durationText && status === "completed" ? '<span class="meta-pill">Completed in ' + escapeHtml(durationText) + '</span>' : '') +
+          '</div></div>';
         column.appendChild(card);
       });
-
       cleanupEmptyColumns();
     }
 
     async function fetchFromGoogle() {
       setSyncStatus("Syncing", "bg-yellow-500 animate-pulse");
       renderBoardShell();
-
       try {
         const response = await fetch(scriptURL);
         if (!response.ok) throw new Error("HTTP " + response.status);
@@ -642,33 +643,26 @@
       const creator = document.getElementById("taskCreator").value.trim();
       const dueDate = document.getElementById("taskDue").value;
       const btn = document.getElementById("submitBtn");
-
       if (!title) return alert("Title required.");
       if (!creator) return alert("Creator name required.");
-
       btn.disabled = true;
       btn.innerText = "Saving...";
       setSyncStatus("Saving", "bg-yellow-500 animate-pulse");
-
       try {
         const formData = new URLSearchParams();
-
         if (taskId) {
           const existingTask = currentTasks.find(t => String(t.task_id) === String(taskId));
           const wasCompleted = existingTask && (isTruthy(existingTask.completed) || String(existingTask.status).toLowerCase().trim() === "completed");
           const nowCompleted = status === "completed";
           const createdAt = existingTask ? getCreatedAt(existingTask) : "";
-
           formData.append("action", "update");
           formData.append("task_id", taskId);
-
           if (!wasCompleted && nowCompleted) {
             const completedAt = nowIso();
             formData.append("completed", "true");
             formData.append("completed_at", completedAt);
             if (createdAt) formData.append("completion_duration", formatDurationFromMs(new Date(completedAt) - new Date(createdAt)));
           }
-
           if (wasCompleted && !nowCompleted) {
             formData.append("completed", "false");
             formData.append("completed_at", "");
@@ -683,7 +677,6 @@
             formData.append("completion_duration", "0 minutes");
           }
         }
-
         formData.append("title", title);
         formData.append("description", description);
         formData.append("status", status);
@@ -691,11 +684,9 @@
         formData.append("due_date", dueDate);
         formData.append("archived", status === "archived" ? "true" : "false");
         if (status === "archived") formData.append("archived_at", todayDateString());
-
         const response = await fetch(scriptURL, { method: "POST", body: formData });
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Save failed");
-
         closeModal();
         await fetchFromGoogle();
       } catch (error) {
@@ -717,16 +708,13 @@
         document.getElementById("timeTrack").innerText = "Complete";
         return;
       }
-
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return;
-
       const currentlyCompleted = isTruthy(task.completed) || (task.status || "").toLowerCase().trim() === "completed";
       const nextCompleted = !currentlyCompleted;
       const completedAt = nextCompleted ? nowIso() : "";
       const createdAt = getCreatedAt(task);
       const duration = nextCompleted && createdAt ? formatDurationFromMs(new Date(completedAt) - new Date(createdAt)) : "";
-
       try {
         const formData = new URLSearchParams();
         formData.append("action", "update");
@@ -736,47 +724,18 @@
         formData.append("completed_at", completedAt);
         formData.append("completion_duration", duration);
         formData.append("archived", "false");
-
         const response = await fetch(scriptURL, { method: "POST", body: formData });
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Complete failed");
-
         document.getElementById("completedTitleLabel").innerText = document.getElementById("taskTitle").value.trim();
         document.getElementById("completedTitleLabel").classList.toggle("strike-title", nextCompleted);
         document.getElementById("taskStatus").value = nextCompleted ? "completed" : "monitoring";
         document.getElementById("timeTrack").innerText = nextCompleted ? "Complete" : "Active";
         document.getElementById("completionDurationLabel").innerText = duration ? "Completed in " + duration : "";
-
         await fetchFromGoogle();
       } catch (error) {
         console.error("Complete error:", error);
         alert("Could not update completion.");
-      }
-    }
-
-    async function archiveTask() {
-      const taskId = document.getElementById("taskId").value.trim();
-      if (!taskId) return alert("Save the task first, then archive it.");
-
-      try {
-        setSyncStatus("Archiving", "bg-yellow-500 animate-pulse");
-        const formData = new URLSearchParams();
-        formData.append("action", "update");
-        formData.append("task_id", taskId);
-        formData.append("archived", "true");
-        formData.append("status", "archived");
-        formData.append("archived_at", todayDateString());
-
-        const response = await fetch(scriptURL, { method: "POST", body: formData });
-        const result = await response.json();
-        if (!result.success) throw new Error(result.error || "Archive failed");
-
-        closeModal();
-        await fetchFromGoogle();
-      } catch (error) {
-        console.error("Archive error:", error);
-        setSyncStatus("Offline", "bg-red-500");
-        alert("Could not archive task.");
       }
     }
 
@@ -805,28 +764,22 @@
     async function dropTask(event, newStatus) {
       event.preventDefault();
       event.stopPropagation();
-      const column = event.currentTarget;
-      column.classList.remove("drag-over");
+      event.currentTarget.classList.remove("drag-over");
       if (isMovingTask) return;
-
       const taskId = event.dataTransfer.getData("text/plain") || draggedTaskId;
       if (!taskId) return;
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return endDrag();
-
       const oldStatus = isTruthy(task.archived) ? "archived" : (task.status || "").toLowerCase().trim();
       if (oldStatus === newStatus) return endDrag();
-
       isMovingTask = true;
       setSyncStatus("Moving", "bg-yellow-500 animate-pulse");
-
       try {
         const wasCompleted = oldStatus === "completed" || isTruthy(task.completed);
         const nowCompleted = newStatus === "completed";
         const completedAt = nowCompleted && !wasCompleted ? nowIso() : (nowCompleted ? task.completed_at || nowIso() : "");
         const createdAt = getCreatedAt(task);
         const duration = nowCompleted && completedAt && createdAt ? formatDurationFromMs(new Date(completedAt) - new Date(createdAt)) : "";
-
         const formData = new URLSearchParams();
         formData.append("action", "update");
         formData.append("task_id", taskId);
@@ -836,11 +789,9 @@
         formData.append("completed_at", completedAt);
         formData.append("completion_duration", duration);
         if (newStatus === "archived") formData.append("archived_at", todayDateString());
-
         const response = await fetch(scriptURL, { method: "POST", body: formData });
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Move failed");
-
         setSyncStatus("Live Sync", "bg-green-500 animate-pulse");
         await fetchFromGoogle();
       } catch (error) {
@@ -856,7 +807,7 @@
     }
 
     function sortColumnByDueDate(columnId) {
-      const sorted = [...currentTasks].sort((a, b) => {
+      const sorted = [].concat(currentTasks).sort(function(a, b) {
         const aStatus = isTruthy(a.archived) ? "archived" : (a.status || "").toLowerCase().trim();
         const bStatus = isTruthy(b.archived) ? "archived" : (b.status || "").toLowerCase().trim();
         const aMatch = aStatus === columnId;
@@ -882,23 +833,19 @@
       const end = textarea.selectionEnd;
       const value = textarea.value;
       const selected = value.substring(start, end);
-      const lineStart = value.lastIndexOf("
-", start - 1) + 1;
-      const before = value.substring(0, lineStart);
-      const after = value.substring(lineStart);
-
       if (selected) {
         const selectedLines = selected.split("
-").map(line => {
+").map(function(line) {
           if (!line.trim()) return line;
           return prefix + line.trim();
         }).join("
 ");
         textarea.value = value.substring(0, start) + selectedLines + value.substring(end);
       } else {
-        textarea.value = before + prefix + after;
+        const lineStart = value.lastIndexOf("
+", start - 1) + 1;
+        textarea.value = value.substring(0, lineStart) + prefix + value.substring(lineStart);
       }
-
       textarea.focus();
     }
 
@@ -914,27 +861,22 @@
       insertDescriptionPrefix("  - ");
     }
 
-    function convertDescriptionToChecklist() {
-      insertChecklistLine();
-    }
-
     async function toggleChecklistLine(taskId, lineIndex) {
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return;
-      const lines = (task.description || "").split("\n");
-
+      const lines = (task.description || "").split("
+");
       if (lines[lineIndex].trim().startsWith("- [x]")) {
         lines[lineIndex] = lines[lineIndex].replace("- [x]", "- [ ]");
       } else if (lines[lineIndex].trim().startsWith("- [ ]")) {
         lines[lineIndex] = lines[lineIndex].replace("- [ ]", "- [x]");
       }
-
-      task.description = lines.join("\n");
+      task.description = lines.join("
+");
       const formData = new URLSearchParams();
       formData.append("action", "update");
       formData.append("task_id", taskId);
       formData.append("description", task.description);
-
       await fetch(scriptURL, { method: "POST", body: formData });
       renderTasks(currentTasks);
     }
@@ -943,7 +885,7 @@
       const modal = document.getElementById("taskModal");
       if (event.target === modal) closeModal();
       if (!event.target.closest(".kanban-column")) {
-        document.querySelectorAll(".column-menu").forEach(menu => {
+        document.querySelectorAll(".column-menu").forEach(function(menu) {
           menu.style.display = "none";
         });
       }
