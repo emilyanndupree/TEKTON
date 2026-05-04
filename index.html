@@ -506,8 +506,7 @@
 
     function renderDescription(task) {
       const desc = task.description || "";
-      const lines = desc.split("
-");
+      const lines = desc.split("\\n");
 
       return lines.map((line, index) => {
         const checked = line.trim().startsWith("- [x]");
@@ -875,22 +874,19 @@
 
     function convertDescriptionToChecklist() {
       const textarea = document.getElementById("taskDesc");
-      const lines = textarea.value.split("
-");
+      const lines = textarea.value.split("\\n");
       textarea.value = lines.map(line => {
         const clean = line.trim();
         if (!clean) return "";
         if (clean.startsWith("- [ ]") || clean.startsWith("- [x]")) return line;
         return "- [ ] " + clean;
-      }).join("
-");
+      }).join("\\n");
     }
 
     async function toggleChecklistLine(taskId, lineIndex) {
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return;
-      const lines = (task.description || "").split("
-");
+      const lines = (task.description || "").split("\\n");
 
       if (lines[lineIndex].trim().startsWith("- [x]")) {
         lines[lineIndex] = lines[lineIndex].replace("- [x]", "- [ ]");
@@ -898,8 +894,7 @@
         lines[lineIndex] = lines[lineIndex].replace("- [ ]", "- [x]");
       }
 
-      task.description = lines.join("
-");
+      task.description = lines.join("\\n");
       const formData = new URLSearchParams();
       formData.append("action", "update");
       formData.append("task_id", taskId);
@@ -923,4 +918,3 @@
   </script>
 </body>
 </html>
-
