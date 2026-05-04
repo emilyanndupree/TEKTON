@@ -208,25 +208,35 @@
       background: rgba(255,255,255,0.45);
     }
 
-    .archived-launcher {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 70;
+    .sheet-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #94A3B8;
+      border-radius: 2px;
+      background: white;
+      cursor: pointer;
+      margin-top: 2px;
+      flex-shrink: 0;
+      position: relative;
     }
 
-    .archived-button {
-      background: #1E293B;
-      color: white;
-      border: 0;
-      border-radius: 999px;
-      padding: 12px 18px;
-      font-weight: 900;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+    .sheet-checkbox:checked {
+      background: #2563EB;
+      border-color: #2563EB;
+    }
+
+    .sheet-checkbox:checked::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 5px;
+      height: 9px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
     }
 
     .strike-title {
@@ -332,9 +342,6 @@
     </div>
   </div>
 
-  <div class="archived-launcher">
-    <button id="archivedToggle" class="archived-button" onclick="toggleArchivedColumn(event)">Archived</button>
-  </div>
 
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbwY5ZaJnj85-b_SX70IpfQ6n457xgNid0v7mop4BAA-pBzb6bEfHtw3lIeNO6OeiRt8/exec";
@@ -346,13 +353,12 @@
       { id: "execution", name: "Execution", color: "#a882ff" },
       { id: "monitoring", name: "Monitoring", color: "#f0506e" },
       { id: "completed", name: "Completed", color: "#84cc16" },
-      { id: "archived", name: "Archived", color: "#1e293b", hidden: true }
+      { id: "archived", name: "Archived", color: "#1e293b" }
     ];
 
     let currentTasks = [];
     let draggedTaskId = null;
     let isMovingTask = false;
-    let showArchivedColumn = false;
     let collapsedCards = JSON.parse(localStorage.getItem("tektonCollapsedCards") || "{}");
 
     function setSyncStatus(text, dotClass) {
@@ -471,7 +477,7 @@
       const container = document.getElementById("boardContainer");
       container.innerHTML = "";
 
-      phases.filter(p => !p.hidden || showArchivedColumn).forEach(p => {
+      phases.forEach(p => {
         container.innerHTML += `
           <div class="kanban-column">
             <div class="col-header" style="border-color: ${p.color}; color: #1e293b;">
@@ -515,7 +521,7 @@
           const text = line.replace("- [x]", "").replace("- [ ]", "").trim();
           return `
             <label class="flex gap-2 items-start text-sm text-slate-500 font-medium mt-2 cursor-pointer">
-              <input type="checkbox" ${checked ? "checked" : ""} onclick="event.stopPropagation(); toggleChecklistLine('${task.task_id}', ${index})" class="mt-1">
+              <input type="checkbox" ${checked ? "checked" : ""} onclick="event.stopPropagation(); toggleChecklistLine('${task.task_id}', ${index})" class="sheet-checkbox">
               <span class="desc-line ${checked ? "line-through opacity-60" : ""}">${escapeHtml(text)}</span>
             </label>
           `;
@@ -536,7 +542,7 @@
       const seen = new Set();
 
       tasks
-        .filter(task => showArchivedColumn || !isTruthy(task.archived))
+        .filter(task => true)
         .forEach(task => {
           const taskId = String(task.task_id || "").trim();
           if (!taskId || seen.has(taskId)) return;
@@ -792,7 +798,6 @@
         if (!result.success) throw new Error(result.error || "Archive failed");
 
         closeModal();
-        showArchivedColumn = true;
         await fetchFromGoogle();
       } catch (error) {
         console.error("Archive error:", error);
@@ -926,13 +931,6 @@
 
     function refreshBoard() {
       fetchFromGoogle();
-    }
-
-    function toggleArchivedColumn(event) {
-      if (event) event.stopPropagation();
-      showArchivedColumn = !showArchivedColumn;
-      renderBoardShell();
-      renderTasks(currentTasks);
     }
 
     function convertDescriptionToChecklist() {
