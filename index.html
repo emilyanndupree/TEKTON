@@ -6,7 +6,6 @@
   <title>TEKTON | Project Masterwork</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-
   <style>
     body {
       font-family: 'Figtree', sans-serif;
@@ -209,36 +208,23 @@
       background: rgba(255,255,255,0.45);
     }
 
-    .strike-title {
-      text-decoration: line-through;
-      opacity: 0.7;
-    }
-
     .sheet-checkbox {
-      appearance: none !important;
-      -webkit-appearance: none !important;
-      width: 16px !important;
-      height: 16px !important;
-      min-width: 16px !important;
-      min-height: 16px !important;
-      border: 2px solid #94A3B8 !important;
-      border-radius: 2px !important;
-      background: #FFFFFF !important;
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #94A3B8;
+      border-radius: 2px;
+      background: white;
       cursor: pointer;
       margin-top: 2px;
       flex-shrink: 0;
       position: relative;
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    .sheet-checkbox:hover {
-      border-color: #2563EB !important;
     }
 
     .sheet-checkbox:checked {
-      background: #2563EB !important;
-      border-color: #2563EB !important;
+      background: #2563EB;
+      border-color: #2563EB;
     }
 
     .sheet-checkbox:checked::after {
@@ -252,10 +238,15 @@
       border-width: 0 2px 2px 0;
       transform: rotate(45deg);
     }
+
+    .strike-title {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
   </style>
 </head>
-
 <body class="flex flex-col">
+
   <header class="bg-white border-b px-8 py-5 flex justify-between items-center shrink-0 h-[85px] z-50 sticky top-0">
     <div class="flex items-center gap-5">
       <img src="https://i.ibb.co/VpT09FQ0/Chat-GPT-Image-May-1-2026-12-51-11-PM-1.png" alt="TEKTON" class="w-12 h-12 rounded-xl object-cover shadow-lg">
@@ -279,7 +270,9 @@
   <div id="taskModal" class="hidden fixed inset-0 bg-slate-900/80 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
     <div class="bg-white rounded-[32px] w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col border border-white/20 shadow-2xl">
       <div class="px-10 py-6 border-b flex justify-between items-center bg-white">
-        <span id="modalModeLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">New Task</span>
+        <div class="flex items-center gap-4">
+          <span id="modalModeLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">New Task</span>
+        </div>
         <button onclick="closeModal()" class="text-5xl text-slate-200 hover:text-slate-600 transition">&times;</button>
       </div>
 
@@ -295,11 +288,7 @@
           <div class="space-y-4">
             <div class="flex items-center justify-between gap-4">
               <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.3em]">Description</label>
-              <div class="flex items-center gap-2">
-                <button onclick="insertChecklistLine()" class="px-4 py-2 rounded-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest">Checkbox</button>
-                <button onclick="insertBulletLine()" class="px-4 py-2 rounded-full bg-slate-600 text-white font-black text-[10px] uppercase tracking-widest">Bullet</button>
-                <button onclick="insertSubBulletLine()" class="px-4 py-2 rounded-full bg-slate-400 text-white font-black text-[10px] uppercase tracking-widest">Sub Bullet</button>
-              </div>
+              <button onclick="convertDescriptionToChecklist()" class="px-4 py-2 rounded-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest">Add Checkboxes</button>
             </div>
             <textarea id="taskDesc" placeholder="Describe the build process..." class="w-full h-64 bg-slate-50/50 p-8 rounded-[32px] outline-none resize-none text-slate-600 text-xl leading-relaxed border-2 border-transparent focus:border-slate-100 transition-all"></textarea>
           </div>
@@ -353,6 +342,7 @@
     </div>
   </div>
 
+
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbwY5ZaJnj85-b_SX70IpfQ6n457xgNid0v7mop4BAA-pBzb6bEfHtw3lIeNO6OeiRt8/exec";
 
@@ -395,7 +385,7 @@
     }
 
     function getCreatedAt(task) {
-      return task.date_created || task.created_at || task.created || task.timestamp || "";
+      return task.created_at || task.created || task.timestamp || task.date_created || "";
     }
 
     function formatDurationFromMs(ms) {
@@ -404,6 +394,7 @@
       const days = Math.floor(totalMinutes / 1440);
       const hours = Math.floor((totalMinutes % 1440) / 60);
       const minutes = totalMinutes % 60;
+
       const parts = [];
       if (days) parts.push(days + " day" + (days === 1 ? "" : "s"));
       if (hours) parts.push(hours + " hour" + (hours === 1 ? "" : "s"));
@@ -412,13 +403,17 @@
     }
 
     function getCompletionDurationText(task) {
-      if (task.completion_duration) return task.completion_duration;
       const createdAt = getCreatedAt(task);
       const completedAt = task.completed_at || "";
+      const savedDuration = task.completion_duration || "";
+
+      if (savedDuration) return savedDuration;
       if (!createdAt || !completedAt) return "";
+
       const start = new Date(createdAt);
       const end = new Date(completedAt);
       if (isNaN(start.getTime()) || isNaN(end.getTime())) return "";
+
       return formatDurationFromMs(end - start);
     }
 
@@ -440,6 +435,7 @@
     function openEditModal(taskId) {
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return;
+
       const status = isTruthy(task.archived) ? "archived" : (task.status || "initiation").toLowerCase().trim();
       const completed = isTruthy(task.completed) || status === "completed";
       const durationText = getCompletionDurationText(task);
@@ -455,6 +451,7 @@
       document.getElementById("completionDurationLabel").innerText = durationText ? "Completed in " + durationText : "";
       document.getElementById("completedTitleLabel").innerText = task.title || "";
       document.getElementById("completedTitleLabel").classList.toggle("strike-title", completed);
+
       document.getElementById("taskModal").classList.remove("hidden");
     }
 
@@ -479,6 +476,7 @@
     function renderBoardShell() {
       const container = document.getElementById("boardContainer");
       container.innerHTML = "";
+
       phases.forEach(p => {
         container.innerHTML += `
           <div class="kanban-column">
@@ -490,7 +488,10 @@
                 <button onclick="refreshBoard()">Refresh Column</button>
               </div>
             </div>
-            <div id="${p.id}" class="task-column space-y-4" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)" ondrop="dropTask(event, '${p.id}')">
+            <div id="${p.id}" class="task-column space-y-4"
+                 ondragover="allowDrop(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="dropTask(event, '${p.id}')">
               <div class="placeholder">Phase Empty</div>
             </div>
           </div>
@@ -540,77 +541,78 @@
 
       const seen = new Set();
 
-      tasks.forEach(task => {
-        const taskId = String(task.task_id || "").trim();
-        if (!taskId || seen.has(taskId)) return;
-        seen.add(taskId);
+      tasks
+        .filter(task => true)
+        .forEach(task => {
+          const taskId = String(task.task_id || "").trim();
+          if (!taskId || seen.has(taskId)) return;
+          seen.add(taskId);
 
-        const status = isTruthy(task.archived) ? "archived" : (task.status || "initiation").toLowerCase().trim();
-        const column = document.getElementById(status);
-        if (!column) return;
+          const status = isTruthy(task.archived) ? "archived" : (task.status || "initiation").toLowerCase().trim();
+          const column = document.getElementById(status);
+          if (!column) return;
 
-        const placeholder = column.querySelector(".placeholder");
-        if (placeholder) placeholder.remove();
+          const placeholder = column.querySelector(".placeholder");
+          if (placeholder) placeholder.remove();
 
-        const dueDate = task.due_date ? new Date(task.due_date + "T00:00:00") : null;
-        const completed = isTruthy(task.completed) || status === "completed" || status === "archived";
+          const dueDate = task.due_date ? new Date(task.due_date + "T00:00:00") : null;
+          const completed = isTruthy(task.completed) || status === "completed" || status === "archived";
 
-        let dueState = "";
-        if (dueDate && !isNaN(dueDate.getTime()) && !completed) {
-          if (dueDate < today) dueState = "overdue";
-          else if (dueDate.getTime() === today.getTime()) dueState = "upcoming";
-        }
-
-        const card = document.createElement("div");
-        card.className = "task-card" +
-          (dueState === "overdue" ? " overdue-card" : "") +
-          (completed ? " completed-card" : "") +
-          (collapsedCards[taskId] ? " collapsed-card" : "");
-        card.draggable = true;
-        card.dataset.taskId = taskId;
-        card.ondragstart = function(e) { dragTask(e, taskId); };
-        card.ondragend = function() { endDrag(); };
-        card.onclick = function(e) {
-          if (!e.target.closest(".card-handle") && !e.target.closest(".collapse-toggle")) {
-            openEditModal(taskId);
+          let dueState = "";
+          if (dueDate && !isNaN(dueDate.getTime()) && !completed) {
+            if (dueDate < today) dueState = "overdue";
+            else if (dueDate.getTime() === today.getTime()) dueState = "upcoming";
           }
-        };
 
-        const creator = task.creator || "";
-        const creatorInitial = creator ? creator.charAt(0).toUpperCase() : "?";
-        const durationText = getCompletionDurationText(task);
+          const card = document.createElement("div");
+          card.className = "task-card" +
+            (dueState === "overdue" ? " overdue-card" : "") +
+            (completed ? " completed-card" : "") +
+            (collapsedCards[taskId] ? " collapsed-card" : "");
+          card.draggable = true;
+          card.dataset.taskId = taskId;
+          card.ondragstart = function(e) { dragTask(e, taskId); };
+          card.ondragend = function() { endDrag(); };
+          card.onclick = function(e) {
+            if (!e.target.closest(".card-handle") && !e.target.closest(".collapse-toggle")) {
+              openEditModal(taskId);
+            }
+          };
 
-        card.innerHTML = `
-          ${dueState === "overdue" ? '<span class="overdue-badge">OVERDUE</span>' : ''}
-          ${dueState === "upcoming" ? '<span class="upcoming-badge">UPCOMING</span>' : ''}
+          const creator = task.creator || "";
+          const creatorInitial = creator ? creator.charAt(0).toUpperCase() : "?";
+          const durationText = getCompletionDurationText(task);
 
-          <div class="flex items-start justify-between gap-3">
-            <h3 class="font-black text-slate-800 uppercase tracking-tight leading-tight text-base">${escapeHtml(task.title || "")}</h3>
-            <div class="flex items-center gap-2">
-              <button class="collapse-toggle" onclick="toggleCardCollapse(event, '${taskId}')">${collapsedCards[taskId] ? "+" : "−"}</button>
-              <span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>
+          card.innerHTML = `
+            ${dueState === "overdue" ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+            ${dueState === "upcoming" ? '<span class="upcoming-badge">UPCOMING</span>' : ''}
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="font-black text-slate-800 uppercase tracking-tight leading-tight text-base">${escapeHtml(task.title || "")}</h3>
+              <div class="flex items-center gap-2">
+                <button class="collapse-toggle" onclick="toggleCardCollapse(event, '${taskId}')">${collapsedCards[taskId] ? "+" : "−"}</button>
+                <span class="card-handle text-slate-300 text-lg select-none">⋮⋮</span>
+              </div>
             </div>
-          </div>
 
-          <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
-            <div class="flex items-center gap-2">
-              <div class="avatar">${escapeHtml(creatorInitial)}</div>
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${escapeHtml(creator)}</span>
+            <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
+              <div class="flex items-center gap-2">
+                <div class="avatar">${escapeHtml(creatorInitial)}</div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${escapeHtml(creator)}</span>
+              </div>
             </div>
-          </div>
 
-          <div class="collapsible-detail">
-            <div class="mt-2">${renderDescription(task)}</div>
-            <div class="flex flex-wrap gap-2 mt-4">
-              ${task.due_date ? `<span class="meta-pill">Due ${escapeHtml(task.due_date)}</span>` : ""}
-              <span class="meta-pill">${escapeHtml(status)}</span>
-              ${durationText && status === "completed" ? `<span class="meta-pill">Completed in ${escapeHtml(durationText)}</span>` : ""}
+            <div class="collapsible-detail">
+              <div class="mt-2">${renderDescription(task)}</div>
+              <div class="flex flex-wrap gap-2 mt-4">
+                ${task.due_date ? `<span class="meta-pill">Due ${escapeHtml(task.due_date)}</span>` : ""}
+                <span class="meta-pill">${escapeHtml(status)}</span>
+                ${durationText && status === "completed" ? `<span class="meta-pill">Completed in ${escapeHtml(durationText)}</span>` : ""}
+              </div>
             </div>
-          </div>
-        `;
+          `;
 
-        column.appendChild(card);
-      });
+          column.appendChild(card);
+        });
 
       cleanupEmptyColumns();
     }
@@ -622,8 +624,10 @@
       try {
         const response = await fetch(scriptURL);
         if (!response.ok) throw new Error("HTTP " + response.status);
+
         const data = await response.json();
         if (data.error) throw new Error(data.error);
+
         currentTasks = Array.isArray(data) ? data : [];
         renderTasks(currentTasks);
         setSyncStatus("Live Sync", "bg-green-500 animate-pulse");
@@ -643,8 +647,14 @@
       const dueDate = document.getElementById("taskDue").value;
       const btn = document.getElementById("submitBtn");
 
-      if (!title) return alert("Title required.");
-      if (!creator) return alert("Creator name required.");
+      if (!title) {
+        alert("Title required.");
+        return;
+      }
+      if (!creator) {
+        alert("Creator name required.");
+        return;
+      }
 
       btn.disabled = true;
       btn.innerText = "Saving...";
@@ -666,7 +676,9 @@
             const completedAt = nowIso();
             formData.append("completed", "true");
             formData.append("completed_at", completedAt);
-            if (createdAt) formData.append("completion_duration", formatDurationFromMs(new Date(completedAt) - new Date(createdAt)));
+            if (createdAt) {
+              formData.append("completion_duration", formatDurationFromMs(new Date(completedAt) - new Date(createdAt)));
+            }
           }
 
           if (wasCompleted && !nowCompleted) {
@@ -676,7 +688,7 @@
           }
         } else {
           formData.append("action", "create");
-          formData.append("date_created", nowIso());
+          formData.append("created_at", nowIso());
           formData.append("completed", status === "completed" ? "true" : "false");
           if (status === "completed") {
             formData.append("completed_at", nowIso());
@@ -690,9 +702,12 @@
         formData.append("creator", creator);
         formData.append("due_date", dueDate);
         formData.append("archived", status === "archived" ? "true" : "false");
-        if (status === "archived") formData.append("archived_at", todayDateString());
 
-        const response = await fetch(scriptURL, { method: "POST", body: formData });
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Save failed");
 
@@ -735,9 +750,12 @@
         formData.append("status", nextCompleted ? "completed" : "monitoring");
         formData.append("completed_at", completedAt);
         formData.append("completion_duration", duration);
-        formData.append("archived", "false");
 
-        const response = await fetch(scriptURL, { method: "POST", body: formData });
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Complete failed");
 
@@ -756,10 +774,14 @@
 
     async function archiveTask() {
       const taskId = document.getElementById("taskId").value.trim();
-      if (!taskId) return alert("Save the task first, then archive it.");
+      if (!taskId) {
+        alert("Save the task first, then archive it.");
+        return;
+      }
 
       try {
         setSyncStatus("Archiving", "bg-yellow-500 animate-pulse");
+
         const formData = new URLSearchParams();
         formData.append("action", "update");
         formData.append("task_id", taskId);
@@ -767,7 +789,11 @@
         formData.append("status", "archived");
         formData.append("archived_at", todayDateString());
 
-        const response = await fetch(scriptURL, { method: "POST", body: formData });
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Archive failed");
 
@@ -805,17 +831,32 @@
     async function dropTask(event, newStatus) {
       event.preventDefault();
       event.stopPropagation();
+
       const column = event.currentTarget;
       column.classList.remove("drag-over");
+
       if (isMovingTask) return;
 
       const taskId = event.dataTransfer.getData("text/plain") || draggedTaskId;
       if (!taskId) return;
+
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
-      if (!task) return endDrag();
+      if (!task) {
+        endDrag();
+        return;
+      }
 
       const oldStatus = isTruthy(task.archived) ? "archived" : (task.status || "").toLowerCase().trim();
-      if (oldStatus === newStatus) return endDrag();
+      if (oldStatus === newStatus) {
+        endDrag();
+        return;
+      }
+
+      const draggedCard = document.querySelector(`[data-task-id="${CSS.escape(taskId)}"]`);
+      if (!draggedCard) {
+        endDrag();
+        return;
+      }
 
       isMovingTask = true;
       setSyncStatus("Moving", "bg-yellow-500 animate-pulse");
@@ -827,6 +868,16 @@
         const createdAt = getCreatedAt(task);
         const duration = nowCompleted && completedAt && createdAt ? formatDurationFromMs(new Date(completedAt) - new Date(createdAt)) : "";
 
+        const placeholder = column.querySelector(".placeholder");
+        if (placeholder) placeholder.remove();
+
+        column.appendChild(draggedCard);
+        task.status = newStatus;
+        task.completed = nowCompleted;
+        task.archived = newStatus === "archived";
+        task.completed_at = completedAt;
+        task.completion_duration = duration;
+
         const formData = new URLSearchParams();
         formData.append("action", "update");
         formData.append("task_id", taskId);
@@ -837,7 +888,11 @@
         formData.append("completion_duration", duration);
         if (newStatus === "archived") formData.append("archived_at", todayDateString());
 
-        const response = await fetch(scriptURL, { method: "POST", body: formData });
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+
         const result = await response.json();
         if (!result.success) throw new Error(result.error || "Move failed");
 
@@ -864,10 +919,12 @@
         if (!aMatch && !bMatch) return 0;
         if (aMatch && !bMatch) return -1;
         if (!aMatch && bMatch) return 1;
+
         const aDate = a.due_date ? new Date(a.due_date).getTime() : Number.MAX_SAFE_INTEGER;
         const bDate = b.due_date ? new Date(b.due_date).getTime() : Number.MAX_SAFE_INTEGER;
         return aDate - bDate;
       });
+
       renderBoardShell();
       renderTasks(sorted);
     }
@@ -876,51 +933,24 @@
       fetchFromGoogle();
     }
 
-    function insertDescriptionPrefix(prefix) {
-      const textarea = document.getElementById("taskDesc");
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const value = textarea.value;
-      const selected = value.substring(start, end);
-      const lineStart = value.lastIndexOf("
-", start - 1) + 1;
-      const before = value.substring(0, lineStart);
-      const after = value.substring(lineStart);
-
-      if (selected) {
-        const selectedLines = selected.split("
-").map(line => {
-          if (!line.trim()) return line;
-          return prefix + line.trim();
-        }).join("
-");
-        textarea.value = value.substring(0, start) + selectedLines + value.substring(end);
-      } else {
-        textarea.value = before + prefix + after;
-      }
-
-      textarea.focus();
-    }
-
-    function insertChecklistLine() {
-      insertDescriptionPrefix("- [ ] ");
-    }
-
-    function insertBulletLine() {
-      insertDescriptionPrefix("- ");
-    }
-
-    function insertSubBulletLine() {
-      insertDescriptionPrefix("  - ");
-    }
-
     function convertDescriptionToChecklist() {
-      insertChecklistLine();
+      const textarea = document.getElementById("taskDesc");
+      const lines = textarea.value.split("\n");
+
+      textarea.value = lines
+        .map(line => {
+          const clean = line.trim();
+          if (!clean) return "";
+          if (clean.startsWith("- [ ]") || clean.startsWith("- [x]")) return line;
+          return "- [ ] " + clean;
+        })
+        .join("\n");
     }
 
     async function toggleChecklistLine(taskId, lineIndex) {
       const task = currentTasks.find(t => String(t.task_id) === String(taskId));
       if (!task) return;
+
       const lines = (task.description || "").split("\n");
 
       if (lines[lineIndex].trim().startsWith("- [x]")) {
@@ -930,18 +960,24 @@
       }
 
       task.description = lines.join("\n");
+
       const formData = new URLSearchParams();
       formData.append("action", "update");
       formData.append("task_id", taskId);
       formData.append("description", task.description);
 
-      await fetch(scriptURL, { method: "POST", body: formData });
+      await fetch(scriptURL, {
+        method: "POST",
+        body: formData
+      });
+
       renderTasks(currentTasks);
     }
 
     window.onclick = function(event) {
       const modal = document.getElementById("taskModal");
       if (event.target === modal) closeModal();
+
       if (!event.target.closest(".kanban-column")) {
         document.querySelectorAll(".column-menu").forEach(menu => {
           menu.style.display = "none";
